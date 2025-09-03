@@ -2,13 +2,13 @@ import Styles from '@/assets/styles'
 import InfoCard from '@/components/InfoCard'
 import styles from '@/components/edit/styles'
 import { useStrings } from '@/providers/I18nProvider'
-import { ShopItem } from '@/types/types'
+import { StoreRow } from '@/types/forms'
 import React, { useEffect, useState } from 'react'
 import { Text, TextInput, TextInputProps, View } from 'react-native'
 
 type Props = {
   label: string
-  value?: string | ShopItem[] | null
+  value?: string | StoreRow[] | null
   /** Om true → rendera ett TextInput i stället för statisk text (gäller bara strängvärden). */
   editable?: boolean
   /** Callback för kontroll av textvärdet (kontrollerad komponent). */

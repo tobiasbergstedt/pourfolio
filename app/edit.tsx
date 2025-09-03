@@ -81,18 +81,6 @@ export default function EditDrinkScreen() {
 
         <PropertiesCard label={t.edit_drink.properties} properties={drink.properties} />
 
-        <DetailField label={t.edit_drink.description} value={drink.description} />
-        <DetailField label={t.edit_drink.pairing_suggestions} value={drink.pairing_suggestions} />
-        <DetailField label={t.edit_drink.where_to_find} value={drink.where_to_find} />
-
-        <AmountCard
-          label={t.edit_drink.amount}
-          value={quantity}
-          onChange={setQuantity}
-          min={0}
-          step={1}
-        />
-
         <DetailField
           label={t.edit_drink.user_notes}
           value={userNotes}
@@ -105,6 +93,18 @@ export default function EditDrinkScreen() {
             maxLength: 1000,
             returnKeyType: 'done',
           }}
+        />
+
+        <DetailField label={t.edit_drink.description} value={drink.description} />
+        <DetailField label={t.edit_drink.pairing_suggestions} value={drink.pairing_suggestions} />
+        <DetailField label={t.edit_drink.where_to_find} value={drink.where_to_find} />
+
+        <AmountCard
+          label={t.edit_drink.amount}
+          value={quantity}
+          onChange={setQuantity}
+          min={0}
+          step={1}
         />
       </EditDrinkLayout>
 
