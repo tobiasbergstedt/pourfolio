@@ -1,5 +1,8 @@
 # Welcome to your Expo app 👋
 
+eas build:configure (to configure a new project)
+eas build --platform android --profile development (create a development build, needed to emulate)
+
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
 ## Get started

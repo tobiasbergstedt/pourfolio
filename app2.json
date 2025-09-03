@@ -1,0 +1,69 @@
+{
+  "expo": {
+    "name": "pourfolio",
+    "slug": "pourfolio",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "pourfolio",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.tobiasbergstedt.pourfolio"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/pourfolio_splash.png",
+          "imageWidth": 200,
+          "resizeMode": "cover",
+          "backgroundColor": "#1D2C51"
+        }
+      ],
+      "expo-font",
+      {
+        "fonts": ["./assets/fonts/SpaceMono-Regular.ttf"],
+        "android": {
+          "fonts": [
+            {
+              "fontFamily": "SpaceMono",
+              "fontDefinitions": [
+                {
+                  "path": "./assets/fonts/SpaceMono-Regular.ttf",
+                  "weight": 400
+                }
+              ]
+            }
+          ]
+        },
+        "ios": {
+          "fonts": ["./assets/fonts/SpaceMono-Regular.ttf"]
+        }
+      }
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e8461e4e-e56d-4cf4-8fd5-9cae3c762d72"
+      }
+    }
+  }
+}

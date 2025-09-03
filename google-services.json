@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "981878261472",
+    "project_id": "pourfolio-4c457",
+    "storage_bucket": "pourfolio-4c457.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:981878261472:android:649502fe719407b181f285",
+        "android_client_info": {
+          "package_name": "com.tobiasbergstedt.pourfolio"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgTA7voT1LZFk7SFNI2SdTTIkP6RUU08E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

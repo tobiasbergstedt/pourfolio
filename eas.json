@@ -1,0 +1,39 @@
+{
+  "cli": {
+    "version": ">= 16.17.3",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_DEVTOOLS_LISTEN_ADDRESS": "0.0.0.0"
+      },
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": true
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "ios": {
+        "simulator": false
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
