@@ -8,23 +8,28 @@ export function useIsAdmin() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async user => {
+    const unsub = onAuthStateChanged(auth, async user => {
+      // Utloggad: nollställ direkt och sluta ladda
       if (!user) {
+        setIsAdmin(false)
         setLoading(false)
         return
       }
-      const docRef = doc(db, 'users', user.uid)
-      const snap = await getDoc(docRef)
 
-      if (snap.exists()) {
-        const data = snap.data()
-        setIsAdmin(data.isAdmin === true)
+      // Ny user: visa loader tills vi hämtat behörighet
+      setLoading(true)
+      try {
+        const snap = await getDoc(doc(db, 'users', user.uid))
+        setIsAdmin(Boolean(snap.exists() && (snap.data() as any)?.isAdmin === true))
+      } catch (e) {
+        console.error('[useIsAdmin] Failed to load admin status', e)
+        setIsAdmin(false)
+      } finally {
+        setLoading(false)
       }
-
-      setLoading(false)
     })
 
-    return unsubscribe
+    return unsub
   }, [])
 
   return { isAdmin, loading }

@@ -1,7 +1,7 @@
 import Colors from '@/assets/colors'
 import ScreenContainer from '@/components/ScreenContainer'
-import { useRouter } from 'expo-router'
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import { Redirect, router } from 'expo-router'
+import { onAuthStateChanged, signInWithEmailAndPassword, User } from 'firebase/auth'
 import { useEffect, useRef, useState } from 'react'
 import { Alert, Animated, Easing, StyleSheet, Text, View } from 'react-native'
 
@@ -13,10 +13,18 @@ import { auth } from '@/lib/firebase'
 import { useStrings } from '@/providers/I18nProvider'
 
 export default function LoginScreen() {
+  const { t } = useStrings()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const router = useRouter()
-  const { t } = useStrings()
+  const [user, setUser] = useState<User | null | undefined>(undefined)
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, setUser)
+    return unsub
+  }, [])
+
+  // Om inloggad: deklarativ redirect, ingen imperativ replace (som ibland träffar 'index' för tidigt)
+  if (user) return <Redirect href="/" />
 
   const handleNavigateToRegister = () => {
     router.push('/register')
@@ -27,12 +35,10 @@ export default function LoginScreen() {
   }
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      return Alert.alert(t.login.missing_fields)
-    }
+    if (!email || !password) return Alert.alert(t.login.missing_fields)
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password)
-      router.replace('/')
+      // Inget router.replace här – onAuthStateChanged sätter user => <Redirect />
     } catch (err) {
       Alert.alert(t.login.login_error, (err as Error).message)
     }

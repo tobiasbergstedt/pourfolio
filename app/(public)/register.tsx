@@ -5,20 +5,29 @@ import MasterButton from '@/components/MasterButton'
 import ScreenContainer from '@/components/ScreenContainer'
 import { auth, db } from '@/lib/firebase'
 import { useStrings } from '@/providers/I18nProvider'
-import { useRouter } from 'expo-router'
-import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { Redirect, useRouter } from 'expo-router'
+import { createUserWithEmailAndPassword, onAuthStateChanged, User } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Alert, Image, StyleSheet, Text, View } from 'react-native'
 
 export default function RegisterScreen() {
+  const { t } = useStrings()
+  const [user, setUser] = useState<User | null | undefined>(undefined)
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const router = useRouter()
-  const { t } = useStrings()
+
+  // ✅ Redir om redan inloggad
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, setUser)
+    return unsub
+  }, [])
+
+  if (user) return <Redirect href="/" />
 
   const handleRegister = async () => {
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
@@ -45,7 +54,6 @@ export default function RegisterScreen() {
       })
 
       Alert.alert(t.general.success, t.register.completed)
-      router.replace('/')
     } catch (err) {
       Alert.alert(t.login.registration_error, (err as Error).message)
     }
