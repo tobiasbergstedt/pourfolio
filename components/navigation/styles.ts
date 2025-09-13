@@ -4,13 +4,26 @@ import Styles from '@/assets/styles'
 import { StyleSheet } from 'react-native'
 
 const styles = StyleSheet.create({
+  appDrawerContentContainer: {
+    paddingBottom: 12,
+    backgroundColor: Colors.white,
+  },
   appDrawerContentHeader: {
     backgroundColor: Colors.userCard,
     paddingHorizontal: Styles.marginPaddingMain,
     paddingVertical: Styles.marginPaddingLarge,
     borderBottomRightRadius: Styles.borderRadiusMain,
-    borderBottomLeftRadius: Styles.borderRadiusMain,
+    borderTopRightRadius: Styles.borderRadiusMain,
     marginBottom: Styles.borderRadiusSmall,
+    marginLeft: -12,
+  },
+  appDrawerEditLink: {
+    position: 'absolute',
+    top: Styles.marginPaddingSmall,
+    right: Styles.marginPaddingSmall,
+    color: Colors.white,
+    borderBottomColor: Colors.white,
+    borderBottomWidth: 1,
   },
   appDrawerContentHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: Styles.gapMedium },
   appDrawerContentAvatar: {
@@ -25,6 +38,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: Styles.fontSizeButton,
   },
+  appDrawerUserInfo: { flex: 1 },
   appDrawerContentTitle: { color: Colors.white, fontSize: Styles.fontSizeMini, marginBottom: 2 },
   appDrawerContentName: { color: Colors.white, fontWeight: '700', fontSize: 18 },
   appDrawerContentEmail: { color: Colors.white, fontSize: Styles.fontSizeMini, marginTop: 2 },

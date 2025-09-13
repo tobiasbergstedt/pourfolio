@@ -2,7 +2,9 @@
 import Colors from '@/assets/colors'
 import styles from '@/components/navigation/styles'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
+import { useUser } from '@/hooks/useUser'
 import { useStrings } from '@/providers/I18nProvider'
+import { useImageUrl } from '@/utils/images'
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons'
 import {
   DrawerContentScrollView,
@@ -11,12 +13,8 @@ import {
   type DrawerContentComponentProps,
 } from '@react-navigation/drawer'
 import Constants from 'expo-constants'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Image, Pressable, Text, View } from 'react-native'
-
-function useUser() {
-  return { name: 'User', email: 'user@example.com', photoURL: null as string | null }
-}
 
 function QuickAction({
   icon,
@@ -45,25 +43,49 @@ export default function AppDrawerContent(props: DrawerContentComponentProps) {
   const version = Constants.expoConfig?.version
   const build = (Constants.expoConfig as any)?.extra?.build
 
+  const goToProfile = () => {
+    props.navigation.navigate('profile' as never)
+  }
+
+  const rawAvatarSource = useMemo(() => user.photoURL ?? null, [user.photoURL])
+  const { url: avatarUrl } = useImageUrl(rawAvatarSource, 64)
+
   return (
-    <DrawerContentScrollView
-      {...props}
-      contentContainerStyle={{ paddingBottom: 12, backgroundColor: Colors.white }}
-    >
+    <DrawerContentScrollView {...props} contentContainerStyle={styles.appDrawerContentContainer}>
       {/* Header */}
-      <View style={styles.appDrawerContentHeader}>
+      <Pressable
+        onPress={goToProfile}
+        accessibilityRole="button"
+        accessibilityLabel={t.navigation?.profile ?? 'Profile'}
+        style={({ pressed }) => [
+          styles.appDrawerContentHeader,
+          pressed && { backgroundColor: Colors.userCardPressed },
+        ]}
+        hitSlop={6}
+      >
+        <Text style={styles.appDrawerEditLink}>Edit</Text>
         <View style={styles.appDrawerContentHeaderRow}>
-          {user.photoURL ? (
-            <Image source={{ uri: user.photoURL }} style={styles.appDrawerContentAvatar} />
+          {avatarUrl ? (
+            // valfritt: key för att bust:a RN-bildcache när URL byts
+            <Image
+              key={avatarUrl}
+              source={{ uri: avatarUrl }}
+              style={styles.appDrawerContentAvatar}
+            />
           ) : (
             <View style={[styles.appDrawerContentAvatar, styles.appDrawerContentAvatarFallback]}>
-              <Text style={styles.appDrawerContentAvatarText}>{user.name?.[0]?.toUpperCase()}</Text>
+              <Text style={styles.appDrawerContentAvatarText}>
+                {user.displayName?.[0]?.toUpperCase()}
+              </Text>
             </View>
           )}
-          <View style={{ flex: 1 }}>
+          <View style={styles.appDrawerUserInfo}>
             <Text style={styles.appDrawerContentTitle}>{t.navigation.welcome}</Text>
             <Text style={styles.appDrawerContentName} numberOfLines={1}>
-              {user.name}
+              {user.displayName}
+            </Text>
+            <Text style={styles.appDrawerContentName} numberOfLines={1}>
+              {user.isAdmin ? '(Admin)' : '(Not admin)'}
             </Text>
             {!!user.email && (
               <Text style={styles.appDrawerContentEmail} numberOfLines={1}>
@@ -72,7 +94,7 @@ export default function AppDrawerContent(props: DrawerContentComponentProps) {
             )}
           </View>
         </View>
-      </View>
+      </Pressable>
 
       {/* Snabbåtgärder */}
       <View style={styles.appDrawerContentSection}>

@@ -81,6 +81,10 @@ const en = {
     name_missing: '[name missing]',
     no_get_drink_type: "Couldn't get drinkType",
     ml: 'ml',
+    save: 'Save',
+    changes_saved: 'Changes saved',
+    email: 'E-post',
+    cancel: 'Cancel',
   },
   login: {
     email: 'Email',
@@ -219,6 +223,13 @@ const en = {
     save: 'Save',
     amount: 'Amount',
     no_matches: 'No drinks match the search.',
+  },
+  profile: {
+    photo: 'Profile photo',
+    change_photo: 'Change photo',
+    first_name: 'First name',
+    last_name: 'Last name',
+    email: 'Email',
   },
 }
 

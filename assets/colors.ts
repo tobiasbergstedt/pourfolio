@@ -10,6 +10,7 @@ const Colors = {
   textLight: '#EEEEEE',
   border: '#EDEDF3',
   userCard: '#6C4EFF',
+  userCardPressed: '#5938FA',
   superLightBlueGray: '#F3F4F6',
 
   // Tillstånd

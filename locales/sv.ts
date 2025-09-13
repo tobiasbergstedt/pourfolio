@@ -81,6 +81,10 @@ const en = {
     name_missing: '[namn saknas]',
     no_get_drink_type: 'Kunde inte hämta drinkType',
     ml: 'ml',
+    save: 'Spara',
+    changes_saved: 'Ändringar sparade',
+    email: 'E-post',
+    cancel: 'Avbryt',
   },
   login: {
     email: 'Email',
@@ -218,6 +222,12 @@ const en = {
     save: 'Spara',
     amount: 'Antal',
     no_matches: 'Inga drycker matchar sökningen.',
+  },
+  profile: {
+    photo: 'Profilbild',
+    change_photo: 'Byt bild',
+    first_name: 'Förnamn',
+    last_name: 'Efternamn',
   },
 }
 
