@@ -39,9 +39,10 @@ const styles = StyleSheet.create({
     fontSize: Styles.fontSizeButton,
   },
   appDrawerUserInfo: { flex: 1 },
-  appDrawerContentTitle: { color: Colors.white, fontSize: Styles.fontSizeMini, marginBottom: 2 },
+  appDrawerContentTitle: { color: Colors.white, fontSize: Styles.fontSizeSmall, marginBottom: 2 },
   appDrawerContentName: { color: Colors.white, fontWeight: '700', fontSize: 18 },
-  appDrawerContentEmail: { color: Colors.white, fontSize: Styles.fontSizeMini, marginTop: 2 },
+  appDrawerContentAdmin: { fontSize: Styles.fontSizeSmall, color: Colors.white },
+  appDrawerContentEmail: { color: Colors.white, fontSize: Styles.fontSizeSmall, marginTop: 2 },
 
   appDrawerContentSection: {
     paddingHorizontal: Styles.marginPaddingMain,

@@ -84,9 +84,11 @@ export default function AppDrawerContent(props: DrawerContentComponentProps) {
             <Text style={styles.appDrawerContentName} numberOfLines={1}>
               {user.displayName}
             </Text>
-            <Text style={styles.appDrawerContentName} numberOfLines={1}>
-              {user.isAdmin ? '(Admin)' : '(Not admin)'}
-            </Text>
+            {user.isAdmin && (
+              <Text style={styles.appDrawerContentAdmin} numberOfLines={1}>
+                (Admin)
+              </Text>
+            )}
             {!!user.email && (
               <Text style={styles.appDrawerContentEmail} numberOfLines={1}>
                 {user.email}
