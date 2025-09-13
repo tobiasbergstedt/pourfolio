@@ -98,10 +98,6 @@ export default function EditDrinkScreen() {
           }}
         />
 
-        <DetailField label={t.edit_drink.description} value={drink.description} />
-        <DetailField label={t.edit_drink.pairing_suggestions} value={drink.pairing_suggestions} />
-        <DetailField label={t.edit_drink.where_to_find} value={drink.where_to_find} />
-
         <AmountCard
           label={t.edit_drink.amount}
           value={quantity}
@@ -109,6 +105,10 @@ export default function EditDrinkScreen() {
           min={0}
           step={1}
         />
+
+        <DetailField label={t.edit_drink.description} value={drink.description} />
+        <DetailField label={t.edit_drink.pairing_suggestions} value={drink.pairing_suggestions} />
+        <DetailField label={t.edit_drink.where_to_find} value={drink.where_to_find} />
       </EditDrinkLayout>
 
       <FullscreenImageViewer
