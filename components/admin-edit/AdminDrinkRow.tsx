@@ -1,8 +1,8 @@
-import Colors from '@/assets/colors'
-import Styles from '@/assets/styles'
+import styles from '@/components/admin-edit/styles'
 import { AdminListDrink } from '@/hooks/useAdminEditList'
+import { useImageUrl } from '@/utils/images'
 import React from 'react'
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Image, Pressable, Text, View } from 'react-native'
 
 type Props = {
   drink: AdminListDrink
@@ -10,38 +10,23 @@ type Props = {
 }
 
 export default function AdminDrinkRow({ drink, onPress }: Props) {
+  const { url } = useImageUrl(drink.image_label ?? null, 'list')
+
   return (
-    <Pressable onPress={onPress} style={s.row}>
+    <Pressable onPress={onPress} style={styles.adminDrinkRowContainer}>
       <Image
-        source={{ uri: drink.image_label || 'https://via.placeholder.com/72' }}
-        style={s.thumb}
+        source={{ uri: url || 'https://via.placeholder.com/72' }}
+        style={styles.adminDrinkRowThumb}
       />
       <View style={{ flex: 1, paddingHorizontal: 12 }}>
-        <Text style={s.name} numberOfLines={1}>
+        <Text style={styles.adminDrinkRowName} numberOfLines={1}>
           {drink.name}
         </Text>
-        <Text style={s.sub} numberOfLines={1}>
+        <Text style={styles.adminDrinkRowSub} numberOfLines={1}>
           {drink.brand ? `${drink.brand} • ${drink.typeLabel}` : drink.typeLabel}
         </Text>
       </View>
-      <Text style={s.chev}>{'›'}</Text>
+      <Text style={styles.adminDrinkRowChevron}>{'›'}</Text>
     </Pressable>
   )
 }
-
-const s = StyleSheet.create({
-  row: {
-    minHeight: 72,
-    borderWidth: 2,
-    borderColor: Colors.border,
-    borderRadius: Styles.borderRadiusCard,
-    backgroundColor: Colors.white,
-    flexDirection: 'row',
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
-  thumb: { width: 72, height: 72, resizeMode: 'cover' },
-  name: { fontSize: 16, fontWeight: '700', color: Colors.black },
-  sub: { fontSize: 13, color: Colors.gray, marginTop: 2 },
-  chev: { paddingHorizontal: 12, color: Colors.gray, fontSize: 20, fontWeight: '500' },
-})

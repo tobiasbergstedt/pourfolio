@@ -3,19 +3,19 @@ import Styles from '@/assets/styles'
 import RatingStars from '@/components/RatingStars'
 import { useStrings } from '@/providers/I18nProvider'
 import { Drink } from '@/types/types'
+import { useImageUrl } from '@/utils/images'
 import { Image, Pressable, Text, View } from 'react-native'
 import styles from './styles'
 
 export default function DrinkItem({ item, onPress }: { item: Drink; onPress: () => void }) {
   const { t } = useStrings()
 
+  const { url } = useImageUrl(item.image_label ?? null, 'list')
+
   return (
     <Pressable style={[styles.item, { marginBottom: Styles.marginPaddingMicro }]} onPress={onPress}>
       <View style={styles.row}>
-        <Image
-          source={{ uri: item.image_label || 'https://via.placeholder.com/50' }}
-          style={styles.thumbnail}
-        />
+        <Image source={{ uri: url || 'https://via.placeholder.com/50' }} style={styles.thumbnail} />
         <View style={styles.middleColumn}>
           <Text style={styles.name}>{item.name}</Text>
           <View style={styles.detailsTextWrapper}>

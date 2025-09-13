@@ -9,6 +9,7 @@ import FullscreenImageViewer from '@/components/ui/FullscreenImageViewer'
 import { useEditDrink } from '@/hooks/useEditDrink'
 import { useStrings } from '@/providers/I18nProvider'
 import { makeI18nTranslators } from '@/utils/i18n'
+import { useImageUrl } from '@/utils/images' //
 import { useLocalSearchParams } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { View } from 'react-native'
@@ -37,6 +38,8 @@ export default function EditDrinkScreen() {
   const { translateDrinkType } = useMemo(() => makeI18nTranslators(t), [t])
 
   const [imageOpen, setImageOpen] = useState(false)
+
+  const { url: fullUrl } = useImageUrl(drink?.image_label ?? null, 'detail')
 
   const translatedType = translateDrinkType(drinkTypeName, { prettifyFallback: true })
 
@@ -111,7 +114,7 @@ export default function EditDrinkScreen() {
       <FullscreenImageViewer
         visible={imageOpen}
         onClose={() => setImageOpen(false)}
-        uri={drink.image_label}
+        uri={fullUrl ?? null}
       />
     </>
   )
