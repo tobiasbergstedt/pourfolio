@@ -77,6 +77,14 @@ function AppDrawer() {
           }}
         />
         <Drawer.Screen
+          name="shopping-list"
+          options={{
+            drawerLabel: t.navigation.shopping_list,
+            title: t.navigation.shopping_list,
+            headerLeft: ({ tintColor }) => <BackButton color={tintColor ?? 'black'} />,
+          }}
+        />
+        <Drawer.Screen
           name="admin-add"
           options={{
             drawerLabel: t.navigation.add_to_database,

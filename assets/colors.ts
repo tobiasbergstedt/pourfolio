@@ -9,12 +9,15 @@ const Colors = {
   text: '#000000',
   textLight: '#EEEEEE',
   border: '#EDEDF3',
+  userCard: '#6C4EFF',
+  superLightBlueGray: '#F3F4F6',
 
   // Tillstånd
   success: '#4CAF50',
   warning: '#FFC107',
   warningText: '#AC7901',
   danger: '#F44336',
+  dangerLight: '#FFDCDA',
 
   // Gråskalor
   white: '#FFFFFF',
