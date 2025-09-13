@@ -3,12 +3,12 @@ import { useStrings } from '@/providers/I18nProvider'
 import { PropertyRow, StoreRow } from '@/types/forms'
 import type { DrinkType } from '@/types/types'
 import { validateAdminForm } from '@/utils/adminValidation'
+import { extractStoragePathFromUrl, getBestThumb } from '@/utils/images'
 import * as ImagePicker from 'expo-image-picker'
 import { collection, doc, DocumentReference, getDoc, getDocs, updateDoc } from 'firebase/firestore'
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+import { ref as sref, uploadBytes } from 'firebase/storage'
 import { useEffect, useMemo, useState } from 'react'
 import { Alert } from 'react-native'
-import uuid from 'react-native-uuid'
 
 const toNum = (v: string) => {
   const n = parseFloat(String(v).replace(',', '.'))
@@ -23,6 +23,14 @@ const upperAlpha3 = (v: string) =>
     .replace(/[^a-zA-Z]/g, '')
     .toUpperCase()
     .slice(0, 3)
+
+// gissa filändelse för storage-path
+const guessExt = (uri: string, contentType?: string) => {
+  const u = uri.toLowerCase()
+  if (contentType?.includes('png') || u.endsWith('.png')) return 'png'
+  if (contentType?.includes('webp') || u.endsWith('.webp')) return 'webp'
+  return 'jpg'
+}
 
 export function useAdminEditForm(id?: string) {
   const { t } = useStrings()
@@ -48,8 +56,9 @@ export function useAdminEditForm(id?: string) {
   const [whereToFind, setWhereToFind] = useState<StoreRow[]>([{ name: '', price: 0 }])
 
   // bild
-  const [imagePreviewUri, setImagePreviewUri] = useState<string | null>(null)
-  const [localImageUri, setLocalImageUri] = useState<string | null>(null)
+  const [imagePreviewUri, setImagePreviewUri] = useState<string | null>(null) // URL för visning
+  const [imageStoragePath, setImageStoragePath] = useState<string | null>(null) // path från doc (eller extraherad)
+  const [localImageUri, setLocalImageUri] = useState<string | null>(null) // nyvald bild (lokal)
 
   useEffect(() => {
     let cancelled = false
@@ -101,18 +110,36 @@ export function useAdminEditForm(id?: string) {
         const props = Array.isArray(data.properties) ? data.properties : []
         setProperties(
           props.length
-            ? props.map((p: any) => ({ name: String(p.name ?? ''), value: String(p.value ?? '') }))
-            : [{ name: '', value: '' }]
+            ? props.map((p: any) => ({ name: String(p.name ?? ''), value: p.value }))
+            : [{ name: '', value: 0 }]
         )
 
         const shops = Array.isArray(data.where_to_find) ? data.where_to_find : []
         setWhereToFind(
           shops.length
-            ? shops.map((s: any) => ({ name: String(s.name ?? ''), price: String(s.price ?? '') }))
-            : [{ name: '', price: '' }]
+            ? shops.map((s: any) => ({ name: String(s.name ?? ''), price: s.price }))
+            : [{ name: '', price: 0 }]
         )
 
-        setImagePreviewUri(data.image_label ?? null)
+        // Bild: doc kan ha path ELLER URL – spara path i state + skaffa preview-URL
+        const rawLabel: string | null = data.image_label ?? null
+        const path =
+          rawLabel && /^https?:\/\//i.test(rawLabel)
+            ? (extractStoragePathFromUrl(rawLabel) ?? null)
+            : (rawLabel ?? null)
+        setImageStoragePath(path)
+
+        if (rawLabel) {
+          // Hämta en lämplig visnings-URL (thumb/orig), funkar för både path & URL
+          try {
+            const res = await getBestThumb(rawLabel, 128)
+            if (!cancelled) setImagePreviewUri(res.url)
+          } catch {
+            if (!cancelled) setImagePreviewUri(null)
+          }
+        } else {
+          setImagePreviewUri(null)
+        }
 
         const ref = data.drink_type as DocumentReference | undefined
         const type = ref ? (types.find(t => t.id === ref.id) ?? null) : null
@@ -128,10 +155,9 @@ export function useAdminEditForm(id?: string) {
     return () => {
       cancelled = true
     }
-  }, [id])
+  }, [id, t])
 
   const { errors, canSave } = useMemo(() => {
-    // samma basvalidering som add-flow (kan tweakas)
     return validateAdminForm(
       {
         name,
@@ -144,7 +170,7 @@ export function useAdminEditForm(id?: string) {
       },
       t
     )
-  }, [name, selectedType?.id, volume, alcoholPercent, country, ratingAverage, ratingCount])
+  }, [name, selectedType?.id, volume, alcoholPercent, country, ratingAverage, ratingCount, t])
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
@@ -153,34 +179,36 @@ export function useAdminEditForm(id?: string) {
       return
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'], // Expo ImagePicker v16
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.8,
+      quality: 0.85,
+      selectionLimit: 1,
     })
     if (!result.canceled) {
       setLocalImageUri(result.assets[0].uri)
-      setImagePreviewUri(result.assets[0].uri)
+      setImagePreviewUri(result.assets[0].uri) // visa direkt
     }
   }
 
-  const uploadImageAsync = async (uri: string): Promise<string> => {
-    const blob = await new Promise<Blob>((resolve, reject) => {
-      const xhr = new XMLHttpRequest()
-      xhr.onload = () => resolve(xhr.response)
-      xhr.onerror = () => reject(new Error(t.admin_add?.blob_failed ?? 'Blob creation failed'))
-      xhr.responseType = 'blob'
-      xhr.open('GET', uri, true)
-      xhr.send()
+  // Ladda upp vald bild som STORAGE-PATH: drink_images/<docId>.<ext>
+  const uploadImageAsPath = async (docId: string, uri: string): Promise<string> => {
+    const res = await fetch(uri)
+    const blob = await res.blob()
+    const contentType =
+      blob.type ||
+      (uri.toLowerCase().endsWith('.png')
+        ? 'image/png'
+        : uri.toLowerCase().endsWith('.webp')
+          ? 'image/webp'
+          : 'image/jpeg')
+    const ext = guessExt(uri, contentType)
+    const storagePath = `drink_images/${docId}.${ext}`
+    await uploadBytes(sref(storage, storagePath), blob, {
+      contentType,
+      cacheControl: 'public, max-age=31536000',
     })
-    try {
-      const storageRef = ref(storage, `drink_images/${uuid.v4()}.jpg`)
-      await uploadBytes(storageRef, blob, { contentType: 'image/jpeg' })
-      return await getDownloadURL(storageRef)
-    } finally {
-      // @ts-ignore
-      if (blob && typeof (blob as any).close === 'function') (blob as any).close()
-    }
+    return storagePath
   }
 
   const save = async (onDone?: () => void) => {
@@ -210,15 +238,16 @@ export function useAdminEditForm(id?: string) {
       const ratingAvgNum = toNum(ratingAverage) ?? 0
 
       const cleanProps =
-        properties
-          .map(p => ({ name: p.name.trim(), value: p.value }))
-          .filter(p => p.name && typeof p.value === 'number') ?? []
+        (properties ?? [])
+          .map(p => ({ name: String(p.name ?? '').trim(), value: Number(p.value) }))
+          .filter(p => p.name && Number.isFinite(p.value)) ?? []
 
       const cleanShops =
-        whereToFind
-          .map(s => ({ name: s.name.trim(), price: s.price }))
-          .filter(s => s.name && typeof s.price === 'number') ?? []
+        (whereToFind ?? [])
+          .map(s => ({ name: String(s.name ?? '').trim(), price: Number(s.price) }))
+          .filter(s => s.name && Number.isFinite(s.price)) ?? []
 
+      // Baspayload
       const payload: Record<string, any> = {
         name: name.trim(),
         drink_type: selectedType ? doc(db, 'drinkTypes', selectedType.id) : null,
@@ -238,10 +267,18 @@ export function useAdminEditForm(id?: string) {
         where_to_find: cleanShops,
       }
 
+      // Ny bild vald → ladda upp och spara STORAGE-PATH i image_label
       if (localImageUri) {
-        const imageUrl = await uploadImageAsync(localImageUri)
-        payload.image_label = imageUrl
+        const path = await uploadImageAsPath(id, localImageUri)
+        payload.image_label = path
+        setImageStoragePath(path)
       }
+
+      // (Frivillig migrering) Om ingen ny bild vald men doc hade URL: konvertera till path
+      // Låt bli om du inte vill tysta ändra gamla poster:
+      // else if (!localImageUri && imageStoragePath) {
+      //   payload.image_label = imageStoragePath
+      // }
 
       await updateDoc(doc(db, 'drinks', id), payload)
       onDone?.()
@@ -293,7 +330,7 @@ export function useAdminEditForm(id?: string) {
     setWhereToFind,
 
     // bild
-    imagePreviewUri,
+    imagePreviewUri, // URL för visning
     pickImage,
 
     // actions

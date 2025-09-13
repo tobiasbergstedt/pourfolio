@@ -1,7 +1,7 @@
 // components/ui/ZoomableImage.tsx
 import uiStyles from '@/components/ui/styles'
-import React from 'react'
-import { Dimensions, StyleSheet } from 'react-native'
+import React, { useEffect, useMemo, useState } from 'react'
+import { Image as RNImage, View } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
   useAnimatedStyle,
@@ -10,18 +10,55 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 
-const { width, height } = Dimensions.get('window')
-
-// Konstanter
 const DOUBLE_TAP_ZOOM = 2
 const MAX_ZOOM = 4
 const MIN_ZOOM = 1
 
 type Props = {
   uri: string
+  /** Maxbredd/-höjd som du skickar från viewer (t.ex. 92% × 86% av fönster) */
+  maxW: number
+  maxH: number
 }
 
-export default function ZoomableImage({ uri }: Props) {
+export default function ZoomableImage({ uri, maxW, maxH }: Props) {
+  const [imgW, setImgW] = useState(0)
+  const [imgH, setImgH] = useState(0)
+
+  // hämta naturliga bildmått
+  useEffect(() => {
+    let alive = true
+    RNImage.getSize(
+      uri,
+      (w, h) => {
+        if (alive) {
+          setImgW(w)
+          setImgH(h)
+        }
+      },
+      () => {
+        if (alive) {
+          setImgW(1000)
+          setImgH(1000)
+        }
+      }
+    )
+    return () => {
+      alive = false
+    }
+  }, [uri])
+
+  // contain-fit inom maxW/maxH
+  const { fitW, fitH } = useMemo(() => {
+    if (!maxW || !maxH || !imgW || !imgH) return { fitW: 0, fitH: 0 }
+    const scale = Math.min(maxW / imgW, maxH / imgH)
+    return {
+      fitW: Math.max(1, Math.round(imgW * scale)),
+      fitH: Math.max(1, Math.round(imgH * scale)),
+    }
+  }, [maxW, maxH, imgW, imgH])
+
+  // ---- gester ----
   const scale = useSharedValue(1)
   const savedScale = useSharedValue(1)
   const translateX = useSharedValue(0)
@@ -29,16 +66,15 @@ export default function ZoomableImage({ uri }: Props) {
   const savedTranslateX = useSharedValue(0)
   const savedTranslateY = useSharedValue(0)
 
-  // Pinch zoom
   const pinch = Gesture.Pinch()
     .onStart(() => {
       savedScale.value = scale.value
     })
     .onUpdate(e => {
-      let newScale = savedScale.value * e.scale
-      if (newScale > MAX_ZOOM) newScale = MAX_ZOOM
-      if (newScale < MIN_ZOOM) newScale = MIN_ZOOM
-      scale.value = newScale
+      let s = savedScale.value * e.scale
+      if (s > MAX_ZOOM) s = MAX_ZOOM
+      if (s < MIN_ZOOM) s = MIN_ZOOM
+      scale.value = s
     })
     .onEnd(() => {
       if (scale.value < MIN_ZOOM) {
@@ -48,7 +84,6 @@ export default function ZoomableImage({ uri }: Props) {
       }
     })
 
-  // Pan (dra)
   const pan = Gesture.Pan()
     .onStart(() => {
       savedTranslateX.value = translateX.value
@@ -59,38 +94,31 @@ export default function ZoomableImage({ uri }: Props) {
       translateY.value = savedTranslateY.value + e.translationY
     })
     .onEnd(e => {
-      // Tröghet / inertieffekt vid släpp
-      translateX.value = withDecay({
-        velocity: e.velocityX,
-        clamp: undefined, // kan begränsa om du vill
-      })
-      translateY.value = withDecay({
-        velocity: e.velocityY,
-        clamp: undefined,
-      })
+      translateX.value = withDecay({ velocity: e.velocityX })
+      translateY.value = withDecay({ velocity: e.velocityY })
     })
 
-  // Dubbeltryck zoom mot tryckpunkt
   const doubleTap = Gesture.Tap()
     .numberOfTaps(2)
     .onEnd(e => {
+      if (!fitW || !fitH) return
       if (scale.value > MIN_ZOOM) {
-        // Återställ
         scale.value = withTiming(MIN_ZOOM)
         translateX.value = withTiming(0)
         translateY.value = withTiming(0)
       } else {
-        // Zooma in mot tryckpunkten
-        const tapX = e.x - width / 2
-        const tapY = e.y - height / 2
-        const targetScale = Math.min(DOUBLE_TAP_ZOOM, MAX_ZOOM)
-        translateX.value = withTiming(-tapX * (targetScale - 1))
-        translateY.value = withTiming(-tapY * (targetScale - 1))
-        scale.value = withTiming(targetScale)
+        // center relativt *bildens* initiala box
+        const cx = fitW / 2
+        const cy = fitH / 2
+        const tapX = e.x - cx
+        const tapY = e.y - cy
+        const target = Math.min(DOUBLE_TAP_ZOOM, MAX_ZOOM)
+        translateX.value = withTiming(-tapX * (target - 1))
+        translateY.value = withTiming(-tapY * (target - 1))
+        scale.value = withTiming(target)
       }
     })
 
-  // Gestkombination
   const composed = Gesture.Exclusive(doubleTap, Gesture.Simultaneous(pinch, pan))
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -101,22 +129,23 @@ export default function ZoomableImage({ uri }: Props) {
     ],
   }))
 
+  // Container ska inte tvingas fylla hela ytan; den krymper till bilden
   return (
     <GestureDetector gesture={composed}>
-      <Animated.View style={uiStyles.zoomableImageContainer}>
-        <Animated.Image
-          source={{ uri }}
-          style={[styles.image, animatedStyle]}
-          resizeMode="contain"
-        />
+      <Animated.View
+        style={[uiStyles.zoomableImageContainer, { width: fitW || 1, height: fitH || 1 }]}
+        onStartShouldSetResponder={() => true}
+      >
+        {fitW > 0 && fitH > 0 ? (
+          <Animated.Image
+            source={{ uri }}
+            resizeMode="contain"
+            style={[{ width: fitW, height: fitH }, animatedStyle]}
+          />
+        ) : (
+          <View style={{ width: 1, height: 1 }} />
+        )}
       </Animated.View>
     </GestureDetector>
   )
 }
-
-const styles = StyleSheet.create({
-  image: {
-    width,
-    height,
-  },
-})

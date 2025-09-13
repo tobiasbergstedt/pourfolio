@@ -8,18 +8,25 @@ const styles = StyleSheet.create({
     minHeight: 48,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-evenly',
+    justifyContent: 'space-between',
     borderWidth: 2,
     borderColor: Colors.border,
     backgroundColor: Colors.white,
-    paddingVertical: Styles.marginPaddingSmall,
-    paddingHorizontal: Styles.marginPaddingSmall,
     borderRadius: Styles.borderRadiusCard,
+    overflow: 'hidden',
   },
   typeCellActive: { borderColor: Colors.primary },
-  typeIcon: { width: 48, height: 48, borderRadius: Styles.borderRadiusSmall },
+  typeIcon: {
+    width: 64,
+    height: 64,
+  },
   typeIconFallback: { backgroundColor: Colors.superLightGray },
-  typeText: { color: Colors.black, maxWidth: 120 },
+  typeText: {
+    color: Colors.black,
+    maxWidth: 120,
+    flexGrow: 1,
+    textAlign: 'center',
+  },
   typeTextActive: { color: Colors.primary },
   addDrinkImageContainer: { flex: 1, padding: Styles.marginPaddingLarge, gap: Styles.gapMain },
   addDrinkImageInput: {
@@ -45,7 +52,7 @@ const styles = StyleSheet.create({
   drinkCategoriesWrap: {
     marginLeft: -Styles.marginPaddingMain,
     marginRight: -Styles.marginPaddingMain,
-    marginBottom: 16,
+    marginBottom: Styles.marginPaddingMain,
   },
   drinkCategoriesScrollView: {
     // ingen flexGrow här – låt innehållet styra höjden

@@ -1,6 +1,14 @@
 import { FontAwesome5 } from '@expo/vector-icons'
 import { ImageStyle, TextInputProps, TextStyle, ViewStyle } from 'react-native'
 
+type User = {
+  id: string
+  first_name: string
+  last_name: string
+  is_admin: boolean
+  profile_picture?: string | null
+}
+
 type Drink = {
   id: string
   name: string
@@ -51,7 +59,7 @@ type MasterButtonProps = {
   title: string
   disabled?: boolean
   variant?: 'primary' | 'secondary' | 'danger' | 'text'
-  size?: 'full' | 'auto'
+  size?: 'full' | 'auto' | 'small'
   icon?: React.ReactNode
   inline?: boolean
   style?: ViewStyle
@@ -71,4 +79,5 @@ export type {
   SaveExtras,
   StatsOverviewProps,
   StyleOverrides,
+  User,
 }

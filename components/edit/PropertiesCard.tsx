@@ -3,7 +3,7 @@ import Styles from '@/assets/styles'
 import styles from '@/components/edit/styles'
 import AutoShrinkText from '@/components/ui/AutoShrinkText'
 import DonutGauge from '@/components/ui/DonutGauge'
-import { PropertyItem } from '@/types/types'
+import { PropertyRow } from '@/types/forms'
 import { translatePropertyName } from '@/utils/i18n'
 import { getPropertyIconName } from '@/utils/icons'
 import { FontAwesome5 } from '@expo/vector-icons'
@@ -13,7 +13,7 @@ import InfoCard from '../InfoCard'
 
 type Props = {
   label: string
-  properties?: PropertyItem[] | null
+  properties?: PropertyRow[] | null
   showScale?: boolean // valfritt: visa 0–10 skala
   max?: number // default 10
 }

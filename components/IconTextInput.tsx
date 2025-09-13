@@ -19,6 +19,7 @@ export default function IconTextInput({ icon, style, ...props }: IconTextInputPr
       <TextInput
         {...props}
         placeholderTextColor={Colors.gray}
+        selectionColor={Colors.primary}
         style={[sharedStyles.iconTextInputInput, style]}
         onFocus={e => {
           setFocused(true)

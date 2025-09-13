@@ -14,9 +14,14 @@ export default function MasterButton({
   inline = false,
   style,
 }: MasterButtonProps) {
+  const widthStyle = inline || size === 'auto' || size === 'small' ? styles.auto : styles.full
+
+  const densityStyle = size === 'small' ? styles.small : null
+
   const buttonStyles = [
     styles.base,
-    inline || size === 'auto' ? styles.auto : styles.full,
+    widthStyle,
+    densityStyle,
     variant === 'primary' && styles.primary,
     variant === 'secondary' && styles.secondary,
     variant === 'danger' && styles.danger,
@@ -71,6 +76,10 @@ const styles = StyleSheet.create({
   },
   auto: {
     alignSelf: 'flex-start',
+  },
+  small: {
+    // paddingVertical: Math.max(4, (Styles.marginPaddingSmall ?? 10) - 4),
+    paddingHorizontal: Styles.marginPaddingLarger, // lite kompaktare
   },
   primary: {
     backgroundColor: Colors.primary,

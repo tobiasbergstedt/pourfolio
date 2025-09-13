@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 2,
   },
-  modalCloseIcon: { color: 'white', fontSize: Styles.fontSizeTitle, lineHeight: 22, marginTop: -2 },
+  modalCloseIcon: { color: 'white', fontSize: Styles.fontSizeTitle, lineHeight: 22 },
   modalTitle: {
     fontWeight: '700',
     fontSize: Styles.fontSizeMain,
@@ -64,9 +64,16 @@ const styles = StyleSheet.create({
     color: Colors.black,
   },
   zoomableImageContainer: {
-    flex: 1,
-    justifyContent: 'center',
+    // låt modalen styra maxstorlek – den här centreras och krymper runt bilden
     alignItems: 'center',
+    justifyContent: 'center',
+    maxWidth: '100%',
+    maxHeight: '100%',
+  },
+  imageViewerModalContentInner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
   },
 })
 

@@ -1,10 +1,10 @@
 // components/admin-categories/AdminCategoryRow.tsx
-import Colors from '@/assets/colors'
+import styles from '@/components/admin-edit/styles'
 import type { AdminCategory } from '@/hooks/useAdminCategoryList'
 import { useStrings } from '@/providers/I18nProvider'
 import { makeI18nTranslators } from '@/utils/i18n'
 import React, { useMemo } from 'react'
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Image, Pressable, Text, View } from 'react-native'
 
 type Props = {
   category: AdminCategory
@@ -21,46 +21,21 @@ export default function AdminCategoryRow({ category, onPress }: Props) {
   })
 
   return (
-    <Pressable
-      onPress={onPress}
-      style={{
-        height: 72,
-        borderWidth: 2,
-        borderColor: Colors.border,
-        borderRadius: 12,
-        overflow: 'hidden',
-        backgroundColor: Colors.white,
-      }}
-    >
-      <View style={s.container}>
+    <Pressable onPress={onPress} style={styles.adminCategoryRowPressable}>
+      <View style={styles.adminCategoryRowContainer}>
         {category.icon ? (
-          <Image source={{ uri: category.icon }} style={s.icon} />
+          <Image source={{ uri: category.icon }} style={styles.adminCategoryRowIcon} />
         ) : (
-          <View style={[s.icon, { backgroundColor: Colors.superLightGray }]} />
+          <View style={styles.adminCategoryRowIcon} />
         )}
 
-        <View style={s.textWrap}>
-          <Text style={s.title}>{label}</Text>
-          <Text style={{ fontSize: 13, color: Colors.gray }}>{category.id}</Text>
+        <View style={styles.adminCategoryRowTextWrap}>
+          <Text style={styles.adminCategoryRowTitle}>{label}</Text>
+          <Text style={styles.adminCategoryRowId}>{category.id}</Text>
         </View>
 
-        <Text style={s.chev}>{'›'}</Text>
+        <Text style={styles.adminCategoryRowChevron}>{'›'}</Text>
       </View>
     </Pressable>
   )
 }
-
-const s = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    gap: 12,
-  },
-  icon: { width: 48, height: 48, borderRadius: 8 },
-  textWrap: { flex: 1, paddingHorizontal: 12 },
-  title: { fontSize: 16, fontWeight: '700', color: Colors.black },
-  slug: { fontSize: 13, color: Colors.gray, marginTop: 2 },
-  chev: { paddingHorizontal: 12, color: Colors.gray, fontSize: 20, fontWeight: '500' },
-})

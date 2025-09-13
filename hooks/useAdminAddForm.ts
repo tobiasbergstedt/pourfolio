@@ -1,10 +1,9 @@
-// hooks/useAdminAddForm.ts
+import { useFocusEffect } from '@react-navigation/native'
 import { launchImageLibraryAsync, requestMediaLibraryPermissionsAsync } from 'expo-image-picker'
-import { addDoc, collection, doc, getDocs } from 'firebase/firestore'
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+import { collection, doc, getDocs, setDoc } from 'firebase/firestore'
+import { ref as sref, uploadBytes } from 'firebase/storage'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Alert } from 'react-native'
-import uuid from 'react-native-uuid'
 
 import { db, storage } from '@/lib/firebase'
 import { useStrings } from '@/providers/I18nProvider'
@@ -12,7 +11,6 @@ import { PropertyRow, StoreRow } from '@/types/forms'
 import { DrinkType } from '@/types/types'
 import { validateAdminForm } from '@/utils/adminValidation'
 import { toInt, toNum, upperAlpha3 } from '@/utils/parse'
-import { useFocusEffect } from '@react-navigation/native'
 
 export function useAdminAddForm() {
   const { t } = useStrings()
@@ -104,9 +102,7 @@ export function useAdminAddForm() {
         return
       }
       const result = await launchImageLibraryAsync({
-        // v16: använd strängar – inte enum
-        mediaTypes: ['images'] as const,
-        // börja enkelt – lägg till allowsEditing när du fått upp pickern
+        mediaTypes: ['images'] as const, // Expo SDK 50+: string-variant funkar fint
         quality: 0.9,
         selectionLimit: 1,
       })
@@ -119,23 +115,37 @@ export function useAdminAddForm() {
     }
   }
 
-  const uploadImageAsync = async (uri: string): Promise<string> => {
-    const blob = await new Promise<Blob>((resolve, reject) => {
-      const xhr = new XMLHttpRequest()
-      xhr.onload = () => resolve(xhr.response)
-      xhr.onerror = () => reject(new Error(t.admin_add.blob_failed))
-      xhr.responseType = 'blob'
-      xhr.open('GET', uri, true)
-      xhr.send()
+  // Gissa filändelse från URI/contentType (för storage-path)
+  const guessExt = (uri: string, contentType?: string) => {
+    const u = uri.toLowerCase()
+    if (contentType?.includes('png') || u.endsWith('.png')) return 'png'
+    if (contentType?.includes('webp') || u.endsWith('.webp')) return 'webp'
+    return 'jpg'
+  }
+
+  // Ladda upp bilden och returnera STORAGE-PATH (inte URL)
+  const uploadImageAsPath = async (docId: string, uri: string): Promise<string> => {
+    // hämta Blob från lokal URI
+    const res = await fetch(uri)
+    const blob = await res.blob()
+    const contentType =
+      blob.type ||
+      (uri.toLowerCase().endsWith('.png')
+        ? 'image/png'
+        : uri.toLowerCase().endsWith('.webp')
+          ? 'image/webp'
+          : 'image/jpeg')
+    const ext = guessExt(uri, contentType)
+
+    const storagePath = `drink_images/${docId}.${ext}`
+    const storageRef = sref(storage, storagePath)
+
+    await uploadBytes(storageRef, blob, {
+      contentType,
+      cacheControl: 'public, max-age=31536000',
     })
-    try {
-      const storageRef = ref(storage, `drink_images/${uuid.v4()}.jpg`)
-      await uploadBytes(storageRef, blob, { contentType: 'image/jpeg' }) // ✅
-      return await getDownloadURL(storageRef)
-    } finally {
-      // @ts-ignore
-      if (blob && typeof (blob as any).close === 'function') (blob as any).close()
-    }
+    // Din Cloud Function triggas nu och skapar thumbnails + ev. _orig.webp
+    return storagePath
   }
 
   const save = async (goHomeAfter = false, onDone?: (id: string) => void) => {
@@ -165,13 +175,20 @@ export function useAdminAddForm() {
       const ratingAvgNum = toNum(ratingAverage) ?? 0
 
       const cleanProps = properties
-
         .map(p => ({ name: p.name.trim(), value: p.value }))
         .filter(p => p.name.trim() && Number.isFinite(p.value))
 
       const cleanShops = whereToFind
         .map(s => ({ name: s.name.trim(), price: s.price }))
         .filter(s => s.name.trim() && Number.isFinite(s.price))
+
+      // Skapa ID i förväg så vi kan använda det i storage-path
+      const docRef = doc(collection(db, 'drinks'))
+
+      let imagePath: string | null = null
+      if (imageUri) {
+        imagePath = await uploadImageAsPath(docRef.id, imageUri) // <-- STORAGE-PATH
+      }
 
       const payload: Record<string, any> = {
         name: name.trim(),
@@ -184,23 +201,20 @@ export function useAdminAddForm() {
           number_of_ratings: ratingCountNum,
           amount_of_ratings: ratingCountNum,
         },
-      }
-      if (brand.trim()) payload.brand = brand.trim()
-      if (country.trim()) payload.country = upperAlpha3(country)
-      if (description.trim()) payload.description = description.trim()
-      if (pairingSuggestions.trim()) payload.pairing_suggestions = pairingSuggestions.trim()
-      if (cleanProps.length) payload.properties = cleanProps
-      if (cleanShops.length) payload.where_to_find = cleanShops
-
-      // Bild är valfri
-      if (imageUri) {
-        const imageUrl = await uploadImageAsync(imageUri)
-        payload.image_label = imageUrl
+        // valfria fält om ifyllda
+        ...(brand.trim() && { brand: brand.trim() }),
+        ...(country.trim() && { country: upperAlpha3(country) }),
+        ...(description.trim() && { description: description.trim() }),
+        ...(pairingSuggestions.trim() && { pairing_suggestions: pairingSuggestions.trim() }),
+        ...(cleanProps.length && { properties: cleanProps }),
+        ...(cleanShops.length && { where_to_find: cleanShops }),
+        // Bild: spara STORAGE-PATH
+        ...(imagePath && { image_label: imagePath }),
       }
 
-      const docRef = await addDoc(collection(db, 'drinks'), payload)
+      await setDoc(docRef, payload)
 
-      // rensa formulär (om man vill lägga till fler)
+      // rensa formuläret
       setName('')
       setBrand('')
       setVolume('')
