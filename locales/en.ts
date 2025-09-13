@@ -35,6 +35,7 @@ const en = {
     sek: 'SEK',
     swedish: 'Swedish',
     english: 'English',
+    edit: 'Edit',
     edit_hint: 'Try typing',
     something_went_wrong: 'Something went wrong',
     permission_denied: 'Permission denied',
@@ -85,6 +86,7 @@ const en = {
     changes_saved: 'Changes saved',
     email: 'E-post',
     cancel: 'Cancel',
+    not_logged_in: "You're not logged in",
   },
   login: {
     email: 'Email',
@@ -230,6 +232,7 @@ const en = {
     first_name: 'First name',
     last_name: 'Last name',
     email: 'Email',
+    unable_to_save: 'Unable to save profile',
   },
 }
 

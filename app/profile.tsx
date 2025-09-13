@@ -1,10 +1,10 @@
 // app/profile.tsx
 import Colors from '@/assets/colors'
-import Styles from '@/assets/styles'
 import InfoCard from '@/components/InfoCard'
 import MasterButton from '@/components/MasterButton'
 import ScreenContainer from '@/components/ScreenContainer'
 import editStyles from '@/components/edit/styles'
+import styles from '@/components/profile/styles'
 import { useUser } from '@/hooks/useUser'
 import { db, storage } from '@/lib/firebase'
 import { useStrings } from '@/providers/I18nProvider'
@@ -88,7 +88,7 @@ export default function ProfileScreen() {
     const blob = await new Promise<Blob>((resolve, reject) => {
       const xhr = new XMLHttpRequest()
       xhr.onload = () => resolve(xhr.response)
-      xhr.onerror = () => reject(new Error('Failed to create blob for upload'))
+      xhr.onerror = () => reject(new Error(t.admin_add.blob_failed))
       xhr.responseType = 'blob'
       xhr.open('GET', uri, true)
       xhr.send()
@@ -110,7 +110,7 @@ export default function ProfileScreen() {
 
   const handleSave = async () => {
     if (!user.uid) {
-      Alert.alert(t.general.error, 'Du är inte inloggad.')
+      Alert.alert(t.general.error, t.general.not_logged_in)
       return
     }
     setSaving(true)
@@ -147,7 +147,7 @@ export default function ProfileScreen() {
       router.back()
     } catch (e: any) {
       console.error('[profile/save] error', e)
-      Alert.alert(t.general.error, e?.message ?? 'Kunde inte spara profil')
+      Alert.alert(t.general.error, e?.message ?? t.profile.unable_to_save)
     } finally {
       setSaving(false)
     }
@@ -185,7 +185,7 @@ export default function ProfileScreen() {
   if (user.loading) {
     return (
       <ScreenContainer>
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={styles.profileLoadingContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
         </View>
       </ScreenContainer>
@@ -198,47 +198,23 @@ export default function ProfileScreen() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
         automaticallyAdjustKeyboardInsets
-        contentContainerStyle={{
-          paddingVertical: Styles.marginPaddingMain,
-          paddingBottom: 24 + insets.bottom,
-          gap: Styles.marginPaddingSmall,
-        }}
+        contentContainerStyle={[
+          styles.profileContentContainer,
+          {
+            paddingBottom: 24 + insets.bottom,
+          },
+        ]}
       >
         {/* Profilbild */}
         <InfoCard label={t.profile.photo}>
-          <View style={{ alignItems: 'center', gap: Styles.gapMain }}>
+          <View style={styles.profilePhotoContainer}>
             {localImageUri ? (
-              <Image
-                source={{ uri: localImageUri }}
-                style={{
-                  width: 128,
-                  height: 128,
-                  borderRadius: 64,
-                  backgroundColor: Colors.superLightGray,
-                }}
-              />
+              <Image source={{ uri: localImageUri }} style={styles.profilePhotoImage} />
             ) : avatarUrl ? (
-              <Image
-                source={{ uri: avatarUrl }}
-                style={{
-                  width: 128,
-                  height: 128,
-                  borderRadius: 64,
-                  backgroundColor: Colors.superLightGray,
-                }}
-              />
+              <Image source={{ uri: avatarUrl }} style={styles.profilePhotoImage} />
             ) : (
-              <View
-                style={{
-                  width: 128,
-                  height: 128,
-                  borderRadius: 64,
-                  backgroundColor: Colors.superLightGray,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Text style={{ fontSize: 36, color: Colors.gray }}>
+              <View style={styles.profilePhotoImage}>
+                <Text style={styles.profilePhotoImageFallbackText}>
                   {user.displayName?.[0]?.toUpperCase() ?? '🙂'}
                 </Text>
               </View>
@@ -248,8 +224,8 @@ export default function ProfileScreen() {
         </InfoCard>
 
         {/* Namn */}
-        <View style={{ flexDirection: 'row', gap: Styles.gapMain }}>
-          <InfoCard label={t.profile.first_name} style={{ flex: 1 }}>
+        <View style={styles.profileNameRow}>
+          <InfoCard label={t.profile.first_name} style={styles.profileNameRowCard}>
             <TextInput
               value={firstName}
               onChangeText={setFirstName}
@@ -259,7 +235,7 @@ export default function ProfileScreen() {
               returnKeyType="next"
             />
           </InfoCard>
-          <InfoCard label={t.profile.last_name} style={{ flex: 1 }}>
+          <InfoCard label={t.profile.last_name} style={styles.profileNameRowCard}>
             <TextInput
               value={lastName}
               onChangeText={setLastName}
@@ -273,30 +249,24 @@ export default function ProfileScreen() {
 
         {/* E-post (read-only) */}
         <InfoCard label={t.general.email}>
-          <Text style={{ paddingVertical: 10, color: Colors.gray }}>{user.email ?? '—'}</Text>
+          <Text style={styles.profileEmailText}>{user.email ?? '—'}</Text>
         </InfoCard>
 
         {/* Knappar */}
-        <View
-          style={{
-            flexDirection: 'row',
-            gap: Styles.gapMain,
-            marginTop: Styles.marginPaddingSmall,
-          }}
-        >
+        <View style={styles.profileButtonRow}>
           <MasterButton
             title={saving ? t.general.saving : t.general.save}
             onPress={handleSave}
             disabled={!canSave || saving}
             variant="primary"
-            style={{ flex: 1 }}
+            style={styles.profileButton}
           />
           <MasterButton
             title={t.general.cancel}
             onPress={handleCancel}
             disabled={saving}
             variant="secondary"
-            style={{ flex: 1 }}
+            style={styles.profileButton}
           />
         </View>
       </ScrollView>

@@ -56,17 +56,16 @@ export default function AppDrawerContent(props: DrawerContentComponentProps) {
       <Pressable
         onPress={goToProfile}
         accessibilityRole="button"
-        accessibilityLabel={t.navigation?.profile ?? 'Profile'}
+        accessibilityLabel={t.navigation.profile}
         style={({ pressed }) => [
           styles.appDrawerContentHeader,
           pressed && { backgroundColor: Colors.userCardPressed },
         ]}
         hitSlop={6}
       >
-        <Text style={styles.appDrawerEditLink}>Edit</Text>
+        <Text style={styles.appDrawerEditLink}>{t.general.edit}</Text>
         <View style={styles.appDrawerContentHeaderRow}>
           {avatarUrl ? (
-            // valfritt: key för att bust:a RN-bildcache när URL byts
             <Image
               key={avatarUrl}
               source={{ uri: avatarUrl }}

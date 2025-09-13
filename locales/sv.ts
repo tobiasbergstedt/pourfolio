@@ -35,6 +35,7 @@ const en = {
     sek: 'SEK',
     swedish: 'Swedish',
     english: 'English',
+    edit: 'Redigera',
     edit_hint: 'Börja skriva',
     something_went_wrong: 'Något gick fel',
     permission_denied: 'Behörighet nekad',
@@ -85,6 +86,7 @@ const en = {
     changes_saved: 'Ändringar sparade',
     email: 'E-post',
     cancel: 'Avbryt',
+    not_logged_in: 'Du är inte inloggad.',
   },
   login: {
     email: 'Email',
@@ -228,6 +230,7 @@ const en = {
     change_photo: 'Byt bild',
     first_name: 'Förnamn',
     last_name: 'Efternamn',
+    unable_to_save: 'Kunde inte spara profil',
   },
 }
 
