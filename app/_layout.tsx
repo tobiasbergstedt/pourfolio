@@ -70,7 +70,7 @@ function AppDrawer() {
             title: t.navigation.add_drink,
             headerLeft: ({ tintColor }) => <BackButton color={tintColor ?? 'black'} />,
             drawerIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="plus-circle-outline" color={color} size={size} />
+              <MaterialCommunityIcons name="tray-plus" color={color} size={size} />
             ),
           }}
         />
