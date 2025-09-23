@@ -23,7 +23,7 @@ export default function FullscreenImageViewer({ visible, onClose, uri }: Props) 
       dismissOnBackdropPress={true}
       contentContainerStyle={styles.imageViewerModalContent}
     >
-      {/* Tryck i tom yta INOM content stänger — men vi sätter INGEN fast höjd här */}
+      {/* Tryck i tom yta INOM content stänger - men vi sätter INGEN fast höjd här */}
       <Pressable
         style={[
           styles.imageViewerModalContentInner,

@@ -249,7 +249,7 @@ export default function ProfileScreen() {
 
         {/* E-post (read-only) */}
         <InfoCard label={t.general.email}>
-          <Text style={styles.profileEmailText}>{user.email ?? '—'}</Text>
+          <Text style={styles.profileEmailText}>{user.email ?? t.general.dash}</Text>
         </InfoCard>
 
         {/* Knappar */}

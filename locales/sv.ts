@@ -23,6 +23,7 @@ const en = {
     not_authorized: 'Du har inte behörighet att besöka denna sida',
     welcome: 'Välkommen',
     quick_actions: 'Snabbåtgärder',
+    admin: 'Admin',
     menu: 'Meny',
     settings: 'Inställningar',
     language: 'Språk',
@@ -87,6 +88,9 @@ const en = {
     email: 'E-post',
     cancel: 'Avbryt',
     not_logged_in: 'Du är inte inloggad.',
+    dash: '—',
+    back: 'Tillbaka',
+    app_version: 'Appversion',
   },
   login: {
     email: 'Email',
@@ -216,6 +220,10 @@ const en = {
     results: 'Resultat',
     categories: 'Kategorier',
     slug_id: 'Slug (id)',
+    category_edit_fail: 'AdminCategoryEdit: laddning misslyckades',
+    get_category_list_fail: 'AdminCategoryList: hämtning misslyckades',
+    admin_edit_fail: 'Admin edit: laddning misslyckades',
+    admin_edit_list_fail: 'Admin edit-listan kunde inte hämtas',
   },
   shopping_list: {
     title: 'Inköpslista',

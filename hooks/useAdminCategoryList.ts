@@ -34,7 +34,7 @@ export function useAdminCategoryList() {
           .filter(Boolean)
         setCategories(types)
       } catch (e) {
-        console.error('AdminCategoryList: fetch failed', e)
+        console.error(t.admin_edit.get_category_list_fail, e)
         Alert.alert(t.general.error, t.general.something_went_wrong)
       } finally {
         if (!cancelled) setLoading(false)

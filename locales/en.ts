@@ -23,6 +23,7 @@ const en = {
     not_authorized: "You're not authorized to access this page",
     welcome: 'Welcome',
     quick_actions: 'Quick actions',
+    admin: 'Admin',
     menu: 'Menu',
     settings: 'Settings',
     language: 'Language',
@@ -87,6 +88,9 @@ const en = {
     email: 'E-post',
     cancel: 'Cancel',
     not_logged_in: "You're not logged in",
+    dash: '—',
+    back: 'Back',
+    app_version: 'App version',
   },
   login: {
     email: 'Email',
@@ -217,6 +221,10 @@ const en = {
     results: 'Results',
     categories: 'Categories',
     slug_id: 'Slug (id)',
+    category_edit_fail: 'AdminCategoryEdit: load failed',
+    get_category_list_fail: 'AdminCategoryList: fetch failed',
+    admin_edit_fail: 'Admin edit: load failed',
+    admin_edit_list_fail: 'Admin edit list fetch failed',
   },
   shopping_list: {
     title: 'Shopping list',

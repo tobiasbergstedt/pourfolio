@@ -1,4 +1,5 @@
 // components/BackButton.tsx
+import { useStrings } from '@/providers/I18nProvider'
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from 'expo-router'
 import React from 'react'
@@ -8,6 +9,7 @@ type Props = { color?: string; size?: number }
 
 export default function BackButton({ color = 'black', size = 30 }: Props) {
   const navigation = useNavigation()
+  const { t } = useStrings()
 
   const onPress = () => {
     if (navigation?.canGoBack?.()) {
@@ -25,7 +27,7 @@ export default function BackButton({ color = 'black', size = 30 }: Props) {
       hitSlop={12}
       style={{ paddingHorizontal: 16, paddingVertical: 16 }}
       accessibilityRole="button"
-      accessibilityLabel="Back"
+      accessibilityLabel={t.general.back}
     >
       <Ionicons name="chevron-back" size={size} color={color} />
     </Pressable>

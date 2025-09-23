@@ -145,7 +145,7 @@ export function useAdminEditForm(id?: string) {
         const type = ref ? (types.find(t => t.id === ref.id) ?? null) : null
         setSelectedType(type)
       } catch (e) {
-        console.error('Admin edit: load failed', e)
+        console.error(t.admin_edit.admin_edit_fail, e)
         Alert.alert(t.general.error, t.general.something_went_wrong)
       } finally {
         if (!cancelled) setLoading(false)

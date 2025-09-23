@@ -39,7 +39,7 @@ export function useAdminCategoryEdit(id?: string) {
         setDisplayName(String(data?.name ?? ''))
         setImagePreviewUri(data?.icon ?? null)
       } catch (e) {
-        console.error('AdminCategoryEdit: load failed', e)
+        console.error(t.admin_edit.category_edit_fail, e)
         Alert.alert(t.general.error, t.general.something_went_wrong)
       } finally {
         if (!cancelled) setLoading(false)
@@ -75,7 +75,7 @@ export function useAdminCategoryEdit(id?: string) {
     const blob = await new Promise<Blob>((resolve, reject) => {
       const xhr = new XMLHttpRequest()
       xhr.onload = () => resolve(xhr.response)
-      xhr.onerror = () => reject(new Error(t.admin_add?.blob_failed ?? 'Blob failed'))
+      xhr.onerror = () => reject(new Error(t.admin_add.blob_failed))
       xhr.responseType = 'blob'
       xhr.open('GET', uri, true)
       xhr.send()

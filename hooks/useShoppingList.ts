@@ -1,5 +1,6 @@
 // hooks/useShoppingList.ts
 import { auth, db } from '@/lib/firebase'
+import { useStrings } from '@/providers/I18nProvider'
 import { collection, doc, DocumentReference, getDocs, writeBatch } from 'firebase/firestore'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -24,6 +25,8 @@ export function useShoppingList() {
 
   // Håller "senast sparade/lastade" snapshot
   const initialRef = useRef<DraftItem[]>([])
+
+  const { t } = useStrings()
 
   useEffect(() => {
     let cancelled = false
@@ -118,7 +121,7 @@ export function useShoppingList() {
 
   // ===== Save: rensa kollektionen och skriv helt ny =====
   const saveDraft = useCallback(async () => {
-    if (!colRef) throw new Error('Not signed in')
+    if (!colRef) throw new Error(t.add_drink.not_logged_in)
 
     // Hämta och radera ALLT
     const snap = await getDocs(colRef)
@@ -158,6 +161,6 @@ export function useShoppingList() {
     deleteItem,
     clearPurchased,
     saveDraft,
-    resetDraft, // <— ny
+    resetDraft, // <- ny
   }
 }

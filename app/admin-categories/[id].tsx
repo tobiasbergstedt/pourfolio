@@ -23,7 +23,7 @@ export default function AdminCategoryEditScreen() {
 
   useEffect(() => {
     if (!adminLoading && !isAdmin) {
-      Alert.alert(t.general.error, t.navigation?.not_authorized ?? 'Ej behörig')
+      Alert.alert(t.general.error, t.navigation?.not_authorized)
       router.replace('/')
     }
   }, [adminLoading, isAdmin, router])
@@ -59,7 +59,7 @@ export default function AdminCategoryEditScreen() {
 
         {/* Visningsnamn – icke redigerbart (hämtat från doc) */}
         <InfoCard label={t.admin_add.name}>
-          <Text style={{ fontSize: 16 }}>{f.displayName || '—'}</Text>
+          <Text style={{ fontSize: 16 }}>{f.displayName || t.general.dash}</Text>
         </InfoCard>
 
         {/* Bild – redigerbar via ImagePicker */}

@@ -20,7 +20,7 @@ export default function AdminCategoriesIndexScreen() {
 
   useEffect(() => {
     if (!adminLoading && !isAdmin) {
-      Alert.alert(t.general.error, t.navigation?.not_authorized ?? 'Ej behörig')
+      Alert.alert(t.general.error, t.navigation?.not_authorized)
       router.replace('/')
     }
   }, [adminLoading, isAdmin, router])

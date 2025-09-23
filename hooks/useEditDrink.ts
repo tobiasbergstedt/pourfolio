@@ -24,8 +24,8 @@ export function useEditDrink(id?: string) {
   const [userRating, setUserRating] = useState<number | null>(null)
   const [avgRating, setAvgRating] = useState<number | null>(null)
   const [ratingCount, setRatingCount] = useState<number | null>(null)
-  const [alcoholPercent, setAlcoholPercent] = useState<string>('—')
-  const [drinkTypeName, setDrinkTypeName] = useState<string>('—')
+  const [alcoholPercent, setAlcoholPercent] = useState<string>(t.general.dash)
+  const [drinkTypeName, setDrinkTypeName] = useState<string>(t.general.dash)
   const [userNotes, setUserNotes] = useState<string | null>(null)
 
   const router = useRouter()
@@ -38,8 +38,8 @@ export function useEditDrink(id?: string) {
     setUserRating(null)
     setAvgRating(null)
     setRatingCount(null)
-    setAlcoholPercent('—')
-    setDrinkTypeName('—')
+    setAlcoholPercent(t.general.dash)
+    setDrinkTypeName(t.general.dash)
     setUserNotes(null)
     setLoading(true)
     setSaving(false)
@@ -82,19 +82,19 @@ export function useEditDrink(id?: string) {
             const value = Number(drinkData.alcohol_percent)
             setAlcoholPercent(value > 1.5 ? `${value}% ${t.general.vol}.` : t.general.non_alcoholic)
           } else {
-            setAlcoholPercent('—')
+            setAlcoholPercent(t.general.dash)
           }
 
           if (drinkData.drink_type && typeof (drinkData.drink_type as any).id === 'string') {
             try {
               const typeSnap = await getDoc(drinkData.drink_type as unknown as DocumentReference)
               const typeData = typeSnap.data() as { name?: string } | undefined
-              setDrinkTypeName(typeData?.name ?? '—')
+              setDrinkTypeName(typeData?.name ?? t.general.dash)
             } catch {
-              setDrinkTypeName('—')
+              setDrinkTypeName(t.general.dash)
             }
           } else {
-            setDrinkTypeName('—')
+            setDrinkTypeName(t.general.dash)
           }
         }
       }
@@ -122,7 +122,7 @@ export function useEditDrink(id?: string) {
       const value = Number(drink.alcohol_percent)
       setAlcoholPercent(value > 1.5 ? `${value}% ${t.general.vol}.` : t.general.non_alcoholic)
     } else {
-      setAlcoholPercent('—')
+      setAlcoholPercent(t.general.dash)
     }
   }, [drink?.alcohol_percent, t])
 

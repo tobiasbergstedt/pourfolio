@@ -60,7 +60,7 @@ export default function DetailField({
 
     return (
       <InfoCard label={label}>
-        <Text style={styles.staticField}>{text || '—'}</Text>
+        <Text style={styles.staticField}>{text || t.general.dash}</Text>
       </InfoCard>
     )
   }

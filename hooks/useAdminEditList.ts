@@ -62,7 +62,7 @@ export function useAdminEditList() {
 
         setAllDrinks(drinks)
       } catch (e) {
-        console.error('Admin edit list fetch failed', e)
+        console.error(t.admin_edit.admin_edit_list_fail, e)
         Alert.alert(t.general.error, t.general.something_went_wrong)
       } finally {
         if (!cancelled) setLoading(false)

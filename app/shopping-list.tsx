@@ -25,7 +25,7 @@ export default function ShoppingListScreen() {
     deleteItem,
     clearPurchased,
     saveDraft,
-    resetDraft, // <— från hooken
+    resetDraft, // <- från hooken
   } = useShoppingList()
 
   const router = useRouter()
