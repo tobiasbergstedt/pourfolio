@@ -5,6 +5,7 @@ import BackButton from '@/components/BackButton'
 import AppDrawerContent from '@/components/navigation/AppDrawerContent'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
 import { I18nProvider, useStrings } from '@/providers/I18nProvider'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Slot, useSegments } from 'expo-router'
 import { Drawer } from 'expo-router/drawer'
 import { ActivityIndicator, View } from 'react-native'
@@ -39,7 +40,7 @@ function AppDrawer() {
         screenOptions={{
           headerTitleAlign: 'center',
           drawerActiveTintColor: Colors.primary,
-          drawerInactiveTintColor: Colors.gray,
+          drawerInactiveTintColor: Colors.darkGray,
           drawerActiveBackgroundColor: '#F4F0FF',
           drawerLabelStyle: { fontSize: 15, fontWeight: '600' },
           drawerStyle: {
@@ -57,6 +58,9 @@ function AppDrawer() {
           options={{
             drawerLabel: t.navigation.home,
             title: t.navigation.home,
+            drawerIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="home-outline" color={color} size={size} />
+            ),
           }}
         />
         <Drawer.Screen
@@ -65,6 +69,9 @@ function AppDrawer() {
             drawerLabel: t.navigation.add_drink,
             title: t.navigation.add_drink,
             headerLeft: ({ tintColor }) => <BackButton color={tintColor ?? 'black'} />,
+            drawerIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="plus-circle-outline" color={color} size={size} />
+            ),
           }}
         />
         <Drawer.Screen
@@ -74,6 +81,9 @@ function AppDrawer() {
             title: t.navigation.edit_drink,
             headerLeft: ({ tintColor }) => <BackButton color={tintColor ?? 'black'} />,
             drawerItemStyle: { display: 'none' },
+            drawerIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="pencil" color={color} size={size} />
+            ),
           }}
         />
         <Drawer.Screen
@@ -82,6 +92,9 @@ function AppDrawer() {
             drawerLabel: t.navigation.shopping_list,
             title: t.navigation.shopping_list,
             headerLeft: ({ tintColor }) => <BackButton color={tintColor ?? 'black'} />,
+            drawerIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="format-list-bulleted" color={color} size={size} />
+            ),
           }}
         />
         <Drawer.Screen
@@ -91,6 +104,9 @@ function AppDrawer() {
             title: t.navigation.add_to_database,
             headerLeft: ({ tintColor }) => <BackButton color={tintColor ?? 'black'} />,
             drawerItemStyle: { display: isAdmin ? 'contents' : 'none' },
+            drawerIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="database-plus-outline" color={color} size={size} />
+            ),
           }}
         />
         <Drawer.Screen
@@ -100,6 +116,9 @@ function AppDrawer() {
             title: t.navigation.edit_db_drink,
             headerShown: false, // 👈 hide Drawer header for this group
             drawerItemStyle: { display: isAdmin ? 'contents' : 'none' },
+            drawerIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="database-edit-outline" color={color} size={size} />
+            ),
           }}
         />
         <Drawer.Screen
@@ -109,6 +128,9 @@ function AppDrawer() {
             title: t.navigation.edit_category,
             headerShown: false, // 👈 hide Drawer header for this group
             drawerItemStyle: { display: isAdmin ? 'contents' : 'none' },
+            drawerIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="shape-outline" color={color} size={size} />
+            ),
           }}
         />
         <Drawer.Screen
@@ -118,6 +140,9 @@ function AppDrawer() {
             title: t.navigation.profile,
             headerLeft: ({ tintColor }) => <BackButton color={tintColor ?? 'black'} />,
             drawerItemStyle: { display: 'none' },
+            drawerIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="account-circle-outline" color={color} size={size} />
+            ),
           }}
         />
         <Drawer.Screen
@@ -125,6 +150,9 @@ function AppDrawer() {
           options={{
             drawerLabel: t.navigation.sign_out,
             title: t.navigation.sign_out,
+            drawerIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="logout" color={color} size={size} />
+            ),
           }}
         />
         <Drawer.Screen
@@ -133,6 +161,9 @@ function AppDrawer() {
             drawerLabel: t.navigation.public,
             title: t.navigation.public,
             drawerItemStyle: { display: 'none' },
+            drawerIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="earth" color={color} size={size} />
+            ),
           }}
         />
       </Drawer>

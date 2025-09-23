@@ -2,6 +2,7 @@ const Colors = {
   // Basfärger
   background: '#FCF9F9',
   primary: '#654FBC',
+  primaryPressed: '#816bdaff',
   primaryLight: '#AF9DF8',
   primarySuperLight: '#EDE9FD',
   selectedCard: '#eef',
@@ -12,12 +13,14 @@ const Colors = {
   userCard: '#6C4EFF',
   userCardPressed: '#5938FA',
   superLightBlueGray: '#F3F4F6',
+  logoutBackground: '#E5393514',
+  logoutForeground: '#e01e10ff',
 
   // Tillstånd
   success: '#4CAF50',
   warning: '#FFC107',
   warningText: '#AC7901',
-  danger: '#F44336',
+  danger: '#F52E1F',
   dangerLight: '#FFDCDA',
 
   // Gråskalor

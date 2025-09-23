@@ -1,39 +1,18 @@
-// components/navigation/AppDrawerContent.tsx (ny/uppdaterad)
-import Colors from '@/assets/colors'
+import DrawerGroup from '@/components/navigation/DrawerGroup'
+import FooterVersion from '@/components/navigation/FooterVersion'
+import HeaderCard from '@/components/navigation/HeaderCard'
+import LanguageSection from '@/components/navigation/LanguageSection'
+import LogoutRow from '@/components/navigation/LogoutRow'
 import styles from '@/components/navigation/styles'
+import { useDrawerGroups } from '@/hooks/useDrawerGroups'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
 import { useUser } from '@/hooks/useUser'
 import { useStrings } from '@/providers/I18nProvider'
 import { useImageUrl } from '@/utils/images'
-import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons'
-import {
-  DrawerContentScrollView,
-  DrawerItem,
-  DrawerItemList,
-  type DrawerContentComponentProps,
-} from '@react-navigation/drawer'
+import { DrawerContentScrollView, type DrawerContentComponentProps } from '@react-navigation/drawer'
 import Constants from 'expo-constants'
-import React, { useMemo } from 'react'
-import { Image, Pressable, Text, View } from 'react-native'
-
-function QuickAction({
-  icon,
-  label,
-  onPress,
-}: {
-  icon: React.ReactNode
-  label: string
-  onPress: () => void
-}) {
-  return (
-    <Pressable onPress={onPress} style={styles.appDrawerContentQa}>
-      <View style={styles.appDrawerContentQaIcon}>{icon}</View>
-      <Text style={styles.appDrawerContentQaLabel} numberOfLines={1}>
-        {label}
-      </Text>
-    </Pressable>
-  )
-}
+import React, { useMemo as useReactMemo } from 'react'
+import { View } from 'react-native'
 
 export default function AppDrawerContent(props: DrawerContentComponentProps) {
   const { isAdmin } = useIsAdmin()
@@ -47,124 +26,45 @@ export default function AppDrawerContent(props: DrawerContentComponentProps) {
     props.navigation.navigate('profile' as never)
   }
 
-  const rawAvatarSource = useMemo(() => user.photoURL ?? null, [user.photoURL])
+  const rawAvatarSource = useReactMemo(() => user.photoURL ?? null, [user.photoURL])
   const { url: avatarUrl } = useImageUrl(rawAvatarSource, 64)
+
+  const { generalRoutes, adminRoutes, logoutRoute } = useDrawerGroups(props)
 
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={styles.appDrawerContentContainer}>
-      {/* Header */}
-      <Pressable
-        onPress={goToProfile}
-        accessibilityRole="button"
-        accessibilityLabel={t.navigation.profile}
-        style={({ pressed }) => [
-          styles.appDrawerContentHeader,
-          pressed && { backgroundColor: Colors.userCardPressed },
-        ]}
-        hitSlop={6}
-      >
-        <Text style={styles.appDrawerEditLink}>{t.general.edit}</Text>
-        <View style={styles.appDrawerContentHeaderRow}>
-          {avatarUrl ? (
-            <Image
-              key={avatarUrl}
-              source={{ uri: avatarUrl }}
-              style={styles.appDrawerContentAvatar}
-            />
-          ) : (
-            <View style={[styles.appDrawerContentAvatar, styles.appDrawerContentAvatarFallback]}>
-              <Text style={styles.appDrawerContentAvatarText}>
-                {user.displayName?.[0]?.toUpperCase()}
-              </Text>
-            </View>
-          )}
-          <View style={styles.appDrawerUserInfo}>
-            <Text style={styles.appDrawerContentTitle}>{t.navigation.welcome}</Text>
-            <Text style={styles.appDrawerContentName} numberOfLines={1}>
-              {user.displayName}
-            </Text>
-            {user.isAdmin && (
-              <Text style={styles.appDrawerContentAdmin} numberOfLines={1}>
-                (Admin)
-              </Text>
-            )}
-            {!!user.email && (
-              <Text style={styles.appDrawerContentEmail} numberOfLines={1}>
-                {user.email}
-              </Text>
-            )}
-          </View>
-        </View>
-      </Pressable>
+      <HeaderCard goToProfile={goToProfile} t={t} user={user} avatarUrl={avatarUrl} />
 
-      {/* Snabbåtgärder */}
-      <View style={styles.appDrawerContentSection}>
-        <Text style={styles.appDrawerContentSectionTitle}>{t.navigation.quick_actions}</Text>
-        <View style={styles.appDrawerContentQaRow}>
-          <QuickAction
-            icon={<FontAwesome5 name="plus-circle" size={18} color={Colors.white} />}
-            label={t.navigation.add_drink}
-            onPress={() => props.navigation.navigate('add' as never)}
-          />
-          {isAdmin && (
-            <QuickAction
-              icon={<MaterialCommunityIcons name="database-plus" size={20} color={Colors.white} />}
-              label={t.navigation.add_to_database}
-              onPress={() => props.navigation.navigate('admin-add' as never)}
-            />
-          )}
-          {isAdmin && (
-            <QuickAction
-              icon={
-                <MaterialCommunityIcons name="pencil-box-multiple" size={20} color={Colors.white} />
-              }
-              label={t.navigation.edit_db_drink}
-              onPress={() => props.navigation.navigate('admin-edit/index' as never)}
-            />
-          )}
-        </View>
-      </View>
+      {/* Navigation – Allmänt */}
+      <DrawerGroup title={t.navigation.menu} routes={generalRoutes} drawerProps={props} />
 
-      {/* Navigation */}
-      <View style={styles.appDrawerContentSection}>
-        <Text style={styles.appDrawerContentSectionTitle}>{t.navigation.menu}</Text>
-        <View style={{ borderRadius: 14, overflow: 'hidden' }}>
-          <DrawerItemList {...props} />
-        </View>
-      </View>
+      {/* Admin */}
+      {isAdmin && adminRoutes.length > 0 && (
+        <DrawerGroup title={t.navigation.admin} routes={adminRoutes} drawerProps={props} />
+      )}
 
-      {/* Language */}
-      <View style={styles.appDrawerContentSection}>
-        <Text style={styles.appDrawerContentSectionTitle}>{t.navigation.language}</Text>
-        <DrawerItem
-          label={t.general.swedish}
-          onPress={() => setLocale('sv')}
-          icon={({ color, size }) => (
-            <MaterialCommunityIcons
-              name={locale === 'sv' ? 'check-circle' : 'circle-outline'}
-              color={color}
-              size={size}
-            />
-          )}
-        />
-        <DrawerItem
-          label={t.general.english}
-          onPress={() => setLocale('en')}
-          icon={({ color, size }) => (
-            <MaterialCommunityIcons
-              name={locale === 'en' ? 'check-circle' : 'circle-outline'}
-              color={color}
-              size={size}
-            />
-          )}
-        />
-      </View>
+      {/* Språk */}
+      <LanguageSection t={t} locale={locale} setLocale={setLocale} />
 
-      {/* Footer */}
-      <Text style={styles.appDrawerContentVersion}>
-        v{version}
-        {build ? ` (${build})` : ''}
-      </Text>
+      {/* Spacer som trycker ner logout + footer */}
+      <View style={{ flexGrow: 1 }} />
+
+      {/* Logga ut separat knapp */}
+      <LogoutRow
+        t={t}
+        logoutRoute={logoutRoute}
+        navigate={(name: string) => props.navigation.navigate(name as never)}
+      />
+
+      {/* Footer / version */}
+      <FooterVersion
+        t={t}
+        version={version}
+        build={String(build ?? '')}
+        onPress={() => {
+          // framtida About/Release notes
+        }}
+      />
     </DrawerContentScrollView>
   )
 }

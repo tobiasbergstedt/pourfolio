@@ -1,15 +1,17 @@
-// home/styles.ts
+// components/navigation/styles.ts
 import Colors from '@/assets/colors'
 import Styles from '@/assets/styles'
 import { StyleSheet } from 'react-native'
 
 const styles = StyleSheet.create({
   appDrawerContentContainer: {
+    flexGrow: 1,
     paddingBottom: 12,
     backgroundColor: Colors.white,
+    marginHorizontal: -12,
   },
   appDrawerContentHeader: {
-    backgroundColor: Colors.userCard,
+    backgroundColor: Colors.primary,
     paddingHorizontal: Styles.marginPaddingMain,
     paddingVertical: Styles.marginPaddingLarge,
     borderBottomRightRadius: Styles.borderRadiusMain,
@@ -24,6 +26,22 @@ const styles = StyleSheet.create({
     color: Colors.white,
     borderBottomColor: Colors.white,
     borderBottomWidth: 1,
+  },
+  appDrawerContentProfile: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: Colors.white,
+    padding: 4,
+    borderRadius: 999, // fix: RN kräver nummer, inte '50%'
+  },
+  appDrawerContentAdminBadge: {
+    position: 'absolute',
+    right: -2,
+    bottom: -2,
+    backgroundColor: Colors.white,
+    borderRadius: 10,
+    padding: 2,
   },
   appDrawerContentHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: Styles.gapMedium },
   appDrawerContentAvatar: {
@@ -45,21 +63,34 @@ const styles = StyleSheet.create({
   appDrawerContentEmail: { color: Colors.white, fontSize: Styles.fontSizeSmall, marginTop: 2 },
 
   appDrawerContentSection: {
-    paddingHorizontal: Styles.marginPaddingMain,
-    marginTop: Styles.marginPaddingMini,
+    // paddingHorizontal: Styles.marginPaddingMain,
+    marginTop: Styles.marginPaddingMain,
+    marginBottom: 0,
   },
   appDrawerContentSectionTitle: {
     fontSize: Styles.fontSizeMini,
-    marginBottom: Styles.marginPaddingMicro,
+    marginRight: 'auto',
     letterSpacing: 0.5,
     textTransform: 'uppercase',
-    color: Colors.gray,
+    color: Colors.darkGray,
   },
-
+  appDrawerContentRoutes: { overflow: 'hidden' },
+  appDrawerContentRoutesMargin: { marginBottom: 10 },
+  appDrawerContentSectionTitleWrapper: { marginHorizontal: 24 },
+  appDrawerContentSectionHeaderRow: { marginHorizontal: 24 },
   appDrawerContentQaRow: {
     flexDirection: 'row',
     gap: Styles.gapMain,
     marginBottom: Styles.marginPaddingSmall,
+  },
+  appDrawerContentCustomEntry: {
+    marginHorizontal: 0,
+    marginVertical: 0,
+    borderRadius: 0,
+    minHeight: 48,
+    backgroundColor: 'transparent',
+    borderLeftWidth: 8,
+    justifyContent: 'center',
   },
   appDrawerContentQa: {
     flex: 1,
@@ -70,11 +101,35 @@ const styles = StyleSheet.create({
   appDrawerContentQaIcon: { marginBottom: Styles.marginPaddingMini },
   appDrawerContentQaLabel: { color: Colors.white, fontWeight: '600' },
 
+  appDrawerContentLanguageItem: {
+    paddingLeft: 8,
+    margin: 0,
+    padding: 0,
+    minHeight: 46,
+    backgroundColor: 'transparent',
+    borderRadius: 0,
+  },
+
+  appDrawerContentVersionContainer: {
+    display: 'flex',
+    gap: 12,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Styles.marginPaddingMain,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
   appDrawerContentVersion: {
     textAlign: 'center',
     fontSize: Styles.fontSizeMini,
-    marginTop: Styles.marginPaddingSmall,
     color: Colors.gray,
+  },
+  drawerRowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginHorizontal: Styles.marginPaddingMain,
   },
 })
 
