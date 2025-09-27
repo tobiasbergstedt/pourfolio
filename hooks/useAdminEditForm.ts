@@ -1,3 +1,4 @@
+// hooks/useAdminEditForm.ts
 import { db, storage } from '@/lib/firebase'
 import { useStrings } from '@/providers/I18nProvider'
 import { PropertyRow, StoreRow } from '@/types/forms'
@@ -24,7 +25,6 @@ const upperAlpha3 = (v: string) =>
     .toUpperCase()
     .slice(0, 3)
 
-// gissa filändelse för storage-path
 const guessExt = (uri: string, contentType?: string) => {
   const u = uri.toLowerCase()
   if (contentType?.includes('png') || u.endsWith('.png')) return 'png'
@@ -56,9 +56,9 @@ export function useAdminEditForm(id?: string) {
   const [whereToFind, setWhereToFind] = useState<StoreRow[]>([{ name: '', price: 0 }])
 
   // bild
-  const [imagePreviewUri, setImagePreviewUri] = useState<string | null>(null) // URL för visning
-  const [imageStoragePath, setImageStoragePath] = useState<string | null>(null) // path från doc (eller extraherad)
-  const [localImageUri, setLocalImageUri] = useState<string | null>(null) // nyvald bild (lokal)
+  const [imagePreviewUri, setImagePreviewUri] = useState<string | null>(null)
+  const [imageStoragePath, setImageStoragePath] = useState<string | null>(null)
+  const [localImageUri, setLocalImageUri] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -121,7 +121,7 @@ export function useAdminEditForm(id?: string) {
             : [{ name: '', price: 0 }]
         )
 
-        // Bild: doc kan ha path ELLER URL – spara path i state + skaffa preview-URL
+        // Bild
         const rawLabel: string | null = data.image_label ?? null
         const path =
           rawLabel && /^https?:\/\//i.test(rawLabel)
@@ -130,7 +130,6 @@ export function useAdminEditForm(id?: string) {
         setImageStoragePath(path)
 
         if (rawLabel) {
-          // Hämta en lämplig visnings-URL (thumb/orig), funkar för både path & URL
           try {
             const res = await getBestThumb(rawLabel, 128)
             if (!cancelled) setImagePreviewUri(res.url)
@@ -158,19 +157,16 @@ export function useAdminEditForm(id?: string) {
   }, [id, t])
 
   const { errors, canSave } = useMemo(() => {
-    return validateAdminForm(
-      {
-        name,
-        selectedTypeId: selectedType?.id,
-        volume,
-        alcoholPercent,
-        country,
-        ratingAverage,
-        ratingCount,
-      },
-      t
-    )
-  }, [name, selectedType?.id, volume, alcoholPercent, country, ratingAverage, ratingCount, t])
+    return validateAdminForm({
+      name,
+      selectedTypeId: selectedType?.id,
+      volume,
+      alcoholPercent,
+      country,
+      ratingAverage,
+      ratingCount,
+    })
+  }, [name, selectedType?.id, volume, alcoholPercent, country, ratingAverage, ratingCount])
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
@@ -187,11 +183,10 @@ export function useAdminEditForm(id?: string) {
     })
     if (!result.canceled) {
       setLocalImageUri(result.assets[0].uri)
-      setImagePreviewUri(result.assets[0].uri) // visa direkt
+      setImagePreviewUri(result.assets[0].uri)
     }
   }
 
-  // Ladda upp vald bild som STORAGE-PATH: drink_images/<docId>.<ext>
   const uploadImageAsPath = async (docId: string, uri: string): Promise<string> => {
     const res = await fetch(uri)
     const blob = await res.blob()
@@ -213,18 +208,15 @@ export function useAdminEditForm(id?: string) {
 
   const save = async (onDone?: () => void) => {
     if (!id) return
-    const check = validateAdminForm(
-      {
-        name,
-        selectedTypeId: selectedType?.id,
-        volume,
-        alcoholPercent,
-        country,
-        ratingAverage,
-        ratingCount,
-      },
-      t
-    )
+    const check = validateAdminForm({
+      name,
+      selectedTypeId: selectedType?.id,
+      volume,
+      alcoholPercent,
+      country,
+      ratingAverage,
+      ratingCount,
+    })
     if (!check.canSave) {
       Alert.alert(t.general.error, t.general.fill_all_fields)
       return
@@ -247,7 +239,6 @@ export function useAdminEditForm(id?: string) {
           .map(s => ({ name: String(s.name ?? '').trim(), price: Number(s.price) }))
           .filter(s => s.name && Number.isFinite(s.price)) ?? []
 
-      // Baspayload
       const payload: Record<string, any> = {
         name: name.trim(),
         drink_type: selectedType ? doc(db, 'drinkTypes', selectedType.id) : null,
@@ -267,18 +258,11 @@ export function useAdminEditForm(id?: string) {
         where_to_find: cleanShops,
       }
 
-      // Ny bild vald → ladda upp och spara STORAGE-PATH i image_label
       if (localImageUri) {
         const path = await uploadImageAsPath(id, localImageUri)
         payload.image_label = path
         setImageStoragePath(path)
       }
-
-      // (Frivillig migrering) Om ingen ny bild vald men doc hade URL: konvertera till path
-      // Låt bli om du inte vill tysta ändra gamla poster:
-      // else if (!localImageUri && imageStoragePath) {
-      //   payload.image_label = imageStoragePath
-      // }
 
       await updateDoc(doc(db, 'drinks', id), payload)
       onDone?.()
@@ -296,7 +280,7 @@ export function useAdminEditForm(id?: string) {
     saving,
     notFound,
 
-    // validering
+    // validering (koder)
     errors,
     canSave,
 
@@ -330,7 +314,7 @@ export function useAdminEditForm(id?: string) {
     setWhereToFind,
 
     // bild
-    imagePreviewUri, // URL för visning
+    imagePreviewUri,
     pickImage,
 
     // actions

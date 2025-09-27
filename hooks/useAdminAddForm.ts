@@ -1,3 +1,4 @@
+// hooks/useAdminAddForm.ts
 import { useFocusEffect } from '@react-navigation/native'
 import { launchImageLibraryAsync, requestMediaLibraryPermissionsAsync } from 'expo-image-picker'
 import { collection, doc, getDocs, setDoc } from 'firebase/firestore'
@@ -38,19 +39,15 @@ export function useAdminAddForm() {
   const [whereToFind, setWhereToFind] = useState<StoreRow[]>([{ name: '', price: Number.NaN }])
 
   const { errors, canSave } = useMemo(() => {
-    const { errors, canSave } = validateAdminForm(
-      {
-        name,
-        selectedTypeId: selectedType?.id,
-        volume,
-        alcoholPercent,
-        country,
-        ratingAverage,
-        ratingCount,
-      },
-      t
-    )
-    return { errors, canSave }
+    return validateAdminForm({
+      name,
+      selectedTypeId: selectedType?.id,
+      volume,
+      alcoholPercent,
+      country,
+      ratingAverage,
+      ratingCount,
+    })
   }, [name, selectedType?.id, volume, alcoholPercent, country, ratingAverage, ratingCount])
 
   useEffect(() => {
@@ -102,7 +99,7 @@ export function useAdminAddForm() {
         return
       }
       const result = await launchImageLibraryAsync({
-        mediaTypes: ['images'] as const, // Expo SDK 50+: string-variant funkar fint
+        mediaTypes: ['images'] as const,
         quality: 0.9,
         selectionLimit: 1,
       })
@@ -115,7 +112,7 @@ export function useAdminAddForm() {
     }
   }
 
-  // Gissa filändelse från URI/contentType (för storage-path)
+  // Gissa filändelse
   const guessExt = (uri: string, contentType?: string) => {
     const u = uri.toLowerCase()
     if (contentType?.includes('png') || u.endsWith('.png')) return 'png'
@@ -123,9 +120,8 @@ export function useAdminAddForm() {
     return 'jpg'
   }
 
-  // Ladda upp bilden och returnera STORAGE-PATH (inte URL)
+  // Ladda upp och returnera STORAGE-PATH
   const uploadImageAsPath = async (docId: string, uri: string): Promise<string> => {
-    // hämta Blob från lokal URI
     const res = await fetch(uri)
     const blob = await res.blob()
     const contentType =
@@ -144,24 +140,20 @@ export function useAdminAddForm() {
       contentType,
       cacheControl: 'public, max-age=31536000',
     })
-    // Din Cloud Function triggas nu och skapar thumbnails + ev. _orig.webp
     return storagePath
   }
 
   const save = async (goHomeAfter = false, onDone?: (id: string) => void) => {
     // blockera endast om obligatoriska fält failar
-    const check = validateAdminForm(
-      {
-        name,
-        selectedTypeId: selectedType?.id,
-        volume,
-        alcoholPercent,
-        country,
-        ratingAverage,
-        ratingCount,
-      },
-      t
-    )
+    const check = validateAdminForm({
+      name,
+      selectedTypeId: selectedType?.id,
+      volume,
+      alcoholPercent,
+      country,
+      ratingAverage,
+      ratingCount,
+    })
     if (!check.canSave) {
       Alert.alert(t.general.error, t.general.fill_all_fields)
       return
@@ -182,12 +174,11 @@ export function useAdminAddForm() {
         .map(s => ({ name: s.name.trim(), price: s.price }))
         .filter(s => s.name.trim() && Number.isFinite(s.price))
 
-      // Skapa ID i förväg så vi kan använda det i storage-path
       const docRef = doc(collection(db, 'drinks'))
 
       let imagePath: string | null = null
       if (imageUri) {
-        imagePath = await uploadImageAsPath(docRef.id, imageUri) // <-- STORAGE-PATH
+        imagePath = await uploadImageAsPath(docRef.id, imageUri)
       }
 
       const payload: Record<string, any> = {
@@ -201,20 +192,18 @@ export function useAdminAddForm() {
           number_of_ratings: ratingCountNum,
           amount_of_ratings: ratingCountNum,
         },
-        // valfria fält om ifyllda
         ...(brand.trim() && { brand: brand.trim() }),
         ...(country.trim() && { country: upperAlpha3(country) }),
         ...(description.trim() && { description: description.trim() }),
         ...(pairingSuggestions.trim() && { pairing_suggestions: pairingSuggestions.trim() }),
         ...(cleanProps.length && { properties: cleanProps }),
         ...(cleanShops.length && { where_to_find: cleanShops }),
-        // Bild: spara STORAGE-PATH
         ...(imagePath && { image_label: imagePath }),
       }
 
       await setDoc(docRef, payload)
 
-      // rensa formuläret
+      // reset
       setName('')
       setBrand('')
       setVolume('')
@@ -272,7 +261,7 @@ export function useAdminAddForm() {
     pickImage,
     save,
 
-    // validation
+    // validation (koder)
     errors,
     canSave,
   }

@@ -14,6 +14,7 @@ import sharedStyles from '@/components/shared/styles'
 import { useAdminAddForm } from '@/hooks/useAdminAddForm'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
 import { useStrings } from '@/providers/I18nProvider'
+import { translateAdminAddError } from '@/utils/i18nErrors'
 import { useRouter } from 'expo-router'
 import React, { useEffect } from 'react'
 import { ActivityIndicator, Alert, Platform, ScrollView, Text, TextInput, View } from 'react-native'
@@ -27,7 +28,6 @@ export default function AdminAddDrinkScreen() {
 
   const addForm = useAdminAddForm()
 
-  // redirect om ej admin
   useEffect(() => {
     if (!adminLoading && !isAdmin) {
       Alert.alert(t.general.error, t.navigation.not_authorized)
@@ -73,7 +73,9 @@ export default function AdminAddDrinkScreen() {
             returnKeyType="next"
           />
           {!!addForm.errors.name && (
-            <Text style={[helperError, { alignSelf: 'flex-end' }]}>{addForm.errors.name}</Text>
+            <Text style={[helperError, { alignSelf: 'flex-end' }]}>
+              {translateAdminAddError(t, addForm.errors.name)}
+            </Text>
           )}
         </InfoCard>
 
@@ -104,7 +106,9 @@ export default function AdminAddDrinkScreen() {
               style={editStyles.textInput}
             />
             {!!addForm.errors.country && (
-              <Text style={[helperWarn, { alignSelf: 'flex-end' }]}>{addForm.errors.country}</Text>
+              <Text style={[helperWarn, { alignSelf: 'flex-end' }]}>
+                {translateAdminAddError(t, addForm.errors.country)}
+              </Text>
             )}
           </InfoCard>
         </View>
@@ -121,7 +125,9 @@ export default function AdminAddDrinkScreen() {
               returnKeyType="done"
             />
             {!!addForm.errors.volume && (
-              <Text style={[helperError, { alignSelf: 'flex-end' }]}>{addForm.errors.volume}</Text>
+              <Text style={[helperError, { alignSelf: 'flex-end' }]}>
+                {translateAdminAddError(t, addForm.errors.volume)}
+              </Text>
             )}
           </InfoCard>
           <InfoCard label={t.edit_drink.alcohol} style={{ flex: 1 }}>
@@ -134,7 +140,7 @@ export default function AdminAddDrinkScreen() {
             />
             {!!addForm.errors.alcoholPercent && (
               <Text style={[helperError, { alignSelf: 'flex-end' }]}>
-                {addForm.errors.alcoholPercent}
+                {translateAdminAddError(t, addForm.errors.alcoholPercent)}
               </Text>
             )}
           </InfoCard>
@@ -164,7 +170,7 @@ export default function AdminAddDrinkScreen() {
             />
             {!!addForm.errors.ratingCount && (
               <Text style={[helperWarn, { alignSelf: 'flex-end' }]}>
-                {addForm.errors.ratingCount}
+                {translateAdminAddError(t, addForm.errors.ratingCount)}
               </Text>
             )}
           </InfoCard>
@@ -178,7 +184,7 @@ export default function AdminAddDrinkScreen() {
             />
             {!!addForm.errors.ratingAverage && (
               <Text style={[helperWarn, { alignSelf: 'flex-end' }]}>
-                {addForm.errors.ratingAverage}
+                {translateAdminAddError(t, addForm.errors.ratingAverage)}
               </Text>
             )}
           </InfoCard>
@@ -222,7 +228,7 @@ export default function AdminAddDrinkScreen() {
           />
           {!!addForm.errors.selectedTypeId && (
             <Text style={[helperError, { alignSelf: 'flex-end' }]}>
-              {addForm.errors.selectedTypeId}
+              {translateAdminAddError(t, addForm.errors.selectedTypeId)}
             </Text>
           )}
         </InfoCard>

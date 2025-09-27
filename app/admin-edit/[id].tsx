@@ -1,3 +1,4 @@
+// app/admin-edit/[id].tsx
 import Styles from '@/assets/styles'
 import ImagePickerField from '@/components/admin-add/ImagePickerField'
 import PropertyList from '@/components/admin-add/PropertyList'
@@ -12,6 +13,7 @@ import sharedStyles from '@/components/shared/styles'
 import { useAdminEditForm } from '@/hooks/useAdminEditForm'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
 import { useStrings } from '@/providers/I18nProvider'
+import { translateAdminAddError } from '@/utils/i18nErrors'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useEffect } from 'react'
 import { Alert, Platform, ScrollView, Text, TextInput, View } from 'react-native'
@@ -67,7 +69,9 @@ export default function AdminEditItemScreen() {
             autoCapitalize="words"
             returnKeyType="next"
           />
-          {!!f.errors.name && <Text style={helperError}>{f.errors.name}</Text>}
+          {!!f.errors.name && (
+            <Text style={helperError}>{translateAdminAddError(t, f.errors.name)}</Text>
+          )}
         </InfoCard>
 
         <InfoCard label={t.admin_add.image}>
@@ -93,7 +97,9 @@ export default function AdminEditItemScreen() {
               maxLength={3}
               style={editStyles.textInput}
             />
-            {!!f.errors.country && <Text style={helperWarn}>{f.errors.country}</Text>}
+            {!!f.errors.country && (
+              <Text style={helperWarn}>{translateAdminAddError(t, f.errors.country)}</Text>
+            )}
           </InfoCard>
         </View>
 
@@ -106,7 +112,9 @@ export default function AdminEditItemScreen() {
               keyboardType="numeric"
               style={editStyles.textInput}
             />
-            {!!f.errors.volume && <Text style={helperError}>{f.errors.volume}</Text>}
+            {!!f.errors.volume && (
+              <Text style={helperError}>{translateAdminAddError(t, f.errors.volume)}</Text>
+            )}
           </InfoCard>
           <InfoCard label={t.edit_drink.alcohol} style={{ flex: 1 }}>
             <TextInput
@@ -117,7 +125,7 @@ export default function AdminEditItemScreen() {
               style={editStyles.textInput}
             />
             {!!f.errors.alcoholPercent && (
-              <Text style={helperError}>{f.errors.alcoholPercent}</Text>
+              <Text style={helperError}>{translateAdminAddError(t, f.errors.alcoholPercent)}</Text>
             )}
           </InfoCard>
         </View>
@@ -141,7 +149,9 @@ export default function AdminEditItemScreen() {
               keyboardType="numeric"
               style={editStyles.textInput}
             />
-            {!!f.errors.ratingCount && <Text style={helperWarn}>{f.errors.ratingCount}</Text>}
+            {!!f.errors.ratingCount && (
+              <Text style={helperWarn}>{translateAdminAddError(t, f.errors.ratingCount)}</Text>
+            )}
           </InfoCard>
           <InfoCard label={t.admin_add.average_rating} style={{ flex: 1 }}>
             <TextInput
@@ -151,7 +161,9 @@ export default function AdminEditItemScreen() {
               keyboardType="decimal-pad"
               style={editStyles.textInput}
             />
-            {!!f.errors.ratingAverage && <Text style={helperWarn}>{f.errors.ratingAverage}</Text>}
+            {!!f.errors.ratingAverage && (
+              <Text style={helperWarn}>{translateAdminAddError(t, f.errors.ratingAverage)}</Text>
+            )}
           </InfoCard>
         </View>
 
@@ -186,7 +198,9 @@ export default function AdminEditItemScreen() {
               text: sharedStyles.typeText,
             }}
           />
-          {!!f.errors.selectedTypeId && <Text style={helperError}>{f.errors.selectedTypeId}</Text>}
+          {!!f.errors.selectedTypeId && (
+            <Text style={helperError}>{translateAdminAddError(t, f.errors.selectedTypeId)}</Text>
+          )}
         </InfoCard>
 
         <MasterButton
