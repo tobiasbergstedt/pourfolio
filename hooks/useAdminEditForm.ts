@@ -32,6 +32,9 @@ const guessExt = (uri: string, contentType?: string) => {
   return 'jpg'
 }
 
+// normalisering – samma approach som i admin-add
+const normalizeBarcode = (s: string) => s.replace(/[\s-]/g, '').trim()
+
 export function useAdminEditForm(id?: string) {
   const { t } = useStrings()
   const [loading, setLoading] = useState(true)
@@ -43,6 +46,7 @@ export function useAdminEditForm(id?: string) {
 
   // fält
   const [name, setName] = useState('')
+  const [barcodesText, setBarcodesText] = useState('') // 👈 NYTT
   const [brand, setBrand] = useState('')
   const [volume, setVolume] = useState('')
   const [country, setCountry] = useState('')
@@ -120,6 +124,10 @@ export function useAdminEditForm(id?: string) {
             ? shops.map((s: any) => ({ name: String(s.name ?? ''), price: s.price }))
             : [{ name: '', price: 0 }]
         )
+
+        // 🧾 Barcodes -> textarea
+        const barcodes = Array.isArray(data.barcodes) ? data.barcodes : []
+        setBarcodesText(barcodes.join('\n'))
 
         // Bild
         const rawLabel: string | null = data.image_label ?? null
@@ -239,6 +247,16 @@ export function useAdminEditForm(id?: string) {
           .map(s => ({ name: String(s.name ?? '').trim(), price: Number(s.price) }))
           .filter(s => s.name && Number.isFinite(s.price)) ?? []
 
+      // 🔢 Barcodes: normalisera + unika + tillåt tömning ([])
+      const barcodes = Array.from(
+        new Set(
+          (barcodesText || '')
+            .split(/[\s,;|\n\r]+/) // komma, mellanslag, semikolon, pipe, radbryt
+            .map(normalizeBarcode)
+            .filter(b => b.length > 0)
+        )
+      )
+
       const payload: Record<string, any> = {
         name: name.trim(),
         drink_type: selectedType ? doc(db, 'drinkTypes', selectedType.id) : null,
@@ -256,6 +274,7 @@ export function useAdminEditForm(id?: string) {
         pairing_suggestions: pairingSuggestions.trim() || null,
         properties: cleanProps,
         where_to_find: cleanShops,
+        barcodes, // 👈 alltid sätt (även tom array för att kunna rensa)
       }
 
       if (localImageUri) {
@@ -280,7 +299,7 @@ export function useAdminEditForm(id?: string) {
     saving,
     notFound,
 
-    // validering (koder)
+    // validering
     errors,
     canSave,
 
@@ -292,6 +311,8 @@ export function useAdminEditForm(id?: string) {
     // fält
     name,
     setName,
+    barcodesText,
+    setBarcodesText, // 👈 exportera
     brand,
     setBrand,
     volume,

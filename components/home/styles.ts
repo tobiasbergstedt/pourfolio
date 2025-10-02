@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   listWrapper: {
-    marginBottom: Styles.marginPaddingSmall,
+    // marginBottom: Styles.marginPaddingSmall,
   },
 })
 

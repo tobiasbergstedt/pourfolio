@@ -14,6 +14,7 @@ const en = {
     add_drink: 'Lägg till dryck',
     edit_drink: 'Redigera dryck',
     shopping_list: 'Inköpslista',
+    scan_drink: 'Scanna dryck',
     add_to_database: 'Lägg till i databasen',
     edit_db_drink: 'Redigera objekt i databas',
     edit_category: 'Redigera kategori',
@@ -159,6 +160,9 @@ const en = {
   admin_add: {
     name: 'Namn',
     name_placeholder: 'Ange dryckens namn här',
+    barcodes: 'Streckkod',
+    barcodes_placeholder: '9780201379624',
+    barcodes_help: 'Separera med komma eller radbrytning. Mellanslag och bindestreck tas bort.',
     image: 'Bild',
     save_and_add_more: 'Spara och lägg till fler',
     save_and_go_home: 'Spara och gå till startsidan',
@@ -232,6 +236,13 @@ const en = {
     save: 'Spara',
     amount: 'Antal',
     no_matches: 'Inga drycker matchar sökningen.',
+  },
+  scan: {
+    not_found_title: 'Hittades ej',
+    not_found_message: 'Ingen dryck hittades med den streckkoden',
+    try_again: 'Försök igen',
+    permission: 'Kameratillstånd krävs för att skanna streckkoder.',
+    helper: 'Peka kameran mot en streckkod för att skanna en dryck.',
   },
   profile: {
     photo: 'Profilbild',

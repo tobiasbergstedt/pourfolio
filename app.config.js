@@ -14,6 +14,7 @@ export default {
       supportsTablet: true,
       infoPlist: {
         NSPhotoLibraryUsageDescription: 'We need access to choose a photo for the drink.',
+        NSCameraUsageDescription: 'Kameran används för att skanna streckkoder på drycker.',
       },
     },
     android: {

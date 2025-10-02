@@ -78,6 +78,19 @@ export default function AdminAddDrinkScreen() {
             </Text>
           )}
         </InfoCard>
+        <InfoCard label={t.admin_add.barcodes}>
+          <TextInput
+            value={addForm.barcodesText}
+            onChangeText={addForm.setBarcodesText}
+            placeholder={t.admin_add.barcodes_placeholder}
+            style={[editStyles.textInput, { minHeight: 72 }]}
+            multiline
+            numberOfLines={3}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <Text style={[helperWarn, { alignSelf: 'flex-end' }]}>{t.admin_add.barcodes_help}</Text>
+        </InfoCard>
 
         {/* Bild (valfri) */}
         <InfoCard label={t.admin_add.image}>

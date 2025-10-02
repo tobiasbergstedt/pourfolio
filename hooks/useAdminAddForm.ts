@@ -23,6 +23,7 @@ export function useAdminAddForm() {
 
   // basfält
   const [name, setName] = useState('')
+  const [barcodesText, setBarcodesText] = useState('')
   const [brand, setBrand] = useState('')
   const [volume, setVolume] = useState('')
   const [imageUri, setImageUri] = useState<string | null>(null)
@@ -75,6 +76,7 @@ export function useAdminAddForm() {
       return () => {
         setSelectedType(null)
         setName('')
+        setBarcodesText('')
         setBrand('')
         setVolume('')
         setImageUri(null)
@@ -174,6 +176,16 @@ export function useAdminAddForm() {
         .map(s => ({ name: s.name.trim(), price: s.price }))
         .filter(s => s.name.trim() && Number.isFinite(s.price))
 
+      const normalizeBarcode = (s: string) => s.replace(/[\s-]/g, '').trim()
+      const barcodes = Array.from(
+        new Set(
+          barcodesText
+            .split(/[\s,;|\n\r]+/) // komma, mellanslag eller radbrytning
+            .map(normalizeBarcode)
+            .filter(b => b.length > 0)
+        )
+      )
+
       const docRef = doc(collection(db, 'drinks'))
 
       let imagePath: string | null = null
@@ -199,12 +211,14 @@ export function useAdminAddForm() {
         ...(cleanProps.length && { properties: cleanProps }),
         ...(cleanShops.length && { where_to_find: cleanShops }),
         ...(imagePath && { image_label: imagePath }),
+        ...(barcodes.length && { barcodes }),
       }
 
       await setDoc(docRef, payload)
 
       // reset
       setName('')
+      setBarcodesText('')
       setBrand('')
       setVolume('')
       setImageUri(null)
@@ -220,6 +234,10 @@ export function useAdminAddForm() {
 
       onDone?.(docRef.id)
       return docRef.id
+    } catch (e: any) {
+      console.error('[admin-add] setDoc failed:', e)
+      Alert.alert(t.general.error, e?.message ?? String(e))
+      throw e // valfritt: bubbla upp om du vill hantera högre upp
     } finally {
       setSaving(false)
     }
@@ -234,6 +252,8 @@ export function useAdminAddForm() {
     setSelectedType,
     name,
     setName,
+    barcodesText,
+    setBarcodesText,
     brand,
     setBrand,
     volume,

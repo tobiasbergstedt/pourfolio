@@ -98,6 +98,17 @@ function AppDrawer() {
           }}
         />
         <Drawer.Screen
+          name="scan"
+          options={{
+            drawerLabel: t.navigation.scan_drink ?? 'Scan drink',
+            title: t.navigation.scan_drink ?? 'Scan drink',
+            headerLeft: ({ tintColor }) => <BackButton color={tintColor ?? 'black'} />,
+            drawerIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="barcode-scan" color={color} size={size} />
+            ),
+          }}
+        />
+        <Drawer.Screen
           name="admin-add"
           options={{
             drawerLabel: t.navigation.add_to_database,

@@ -74,6 +74,21 @@ export default function AdminEditItemScreen() {
           )}
         </InfoCard>
 
+        {/* Streckkoder (array) */}
+        <InfoCard label={t.admin_add.barcodes}>
+          <TextInput
+            value={f.barcodesText}
+            onChangeText={f.setBarcodesText}
+            placeholder={t.admin_add.barcodes_placeholder}
+            style={[editStyles.textInput, { minHeight: 72 }]}
+            multiline
+            numberOfLines={3}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <Text style={helperWarn}>{t.admin_add.barcodes_help}</Text>
+        </InfoCard>
+
         <InfoCard label={t.admin_add.image}>
           <ImagePickerField imageUri={f.imagePreviewUri} onPick={f.pickImage} />
         </InfoCard>

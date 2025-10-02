@@ -14,6 +14,7 @@ const en = {
     add_drink: 'Add drink',
     edit_drink: 'Edit drink',
     shopping_list: 'Shopping list',
+    scan_drink: 'Scan drink',
     add_to_database: 'Add to database',
     edit_db_drink: 'Edit item in database',
     edit_category: 'Edit category',
@@ -159,6 +160,9 @@ const en = {
   admin_add: {
     name: 'Name',
     name_placeholder: 'Enter beverage name here',
+    barcodes: 'Barcode',
+    barcodes_placeholder: '9780201379624',
+    barcodes_help: 'Separate with commas or new lines. Spaces and dashes will be removed.',
     image: 'Image',
     pick_image: 'Choose image',
     save_and_add_more: 'Save and add more',
@@ -233,6 +237,13 @@ const en = {
     save: 'Save',
     amount: 'Amount',
     no_matches: 'No drinks match the search.',
+  },
+  scan: {
+    not_found_title: 'Not found',
+    not_found_message: 'No drink found with that barcode',
+    try_again: 'Try again',
+    permission: 'Camera permission is required to scan barcodes.',
+    helper: 'Point the camera at a barcode to scan a drink.',
   },
   profile: {
     photo: 'Profile photo',

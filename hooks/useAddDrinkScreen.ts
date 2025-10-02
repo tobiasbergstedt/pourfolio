@@ -5,31 +5,27 @@ import { addOrUpdateUserDrink, fetchDrinkTypes, fetchDrinks } from '@/services/d
 import type { ListDrink } from '@/types/list'
 import type { DrinkType } from '@/types/types'
 import { useFocusEffect } from '@react-navigation/native'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Alert } from 'react-native'
 
-export function useAddDrinkScreen() {
+type Init = { initialDrinkId?: string; initialTypeId?: string }
+
+export function useAddDrinkScreen(_init?: Init) {
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false) // 👈 NY
+  const [saving, setSaving] = useState(false)
   const [allDrinks, setAllDrinks] = useState<ListDrink[]>([])
   const [drinkTypes, setDrinkTypes] = useState<DrinkType[]>([])
   const [selectedType, setSelectedType] = useState<DrinkType | null>(null)
   const [selectedDrink, setSelectedDrink] = useState<ListDrink | null>(null)
   const [quantity, setQuantity] = useState('1')
   const [listQuery, setListQuery] = useState('')
+
+  // När vi sätter typ/dryck programmatiskt vill vi inte att reset-effekten kör
+  const suppressResetRef = useRef(false)
+
   const { t } = useStrings()
 
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        setSelectedType(null)
-        setSelectedDrink(null)
-        setQuantity('1')
-        setListQuery('')
-      }
-    }, [])
-  )
-
+  // Ladda referensdata
   useEffect(() => {
     const run = async () => {
       setLoading(true)
@@ -47,11 +43,67 @@ export function useAddDrinkScreen() {
     run()
   }, [])
 
+  // Rensa state när skärmen blur:as (när man lämnar Add)
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setSelectedType(null)
+        setSelectedDrink(null)
+        setQuantity('1')
+        setListQuery('')
+        suppressResetRef.current = false
+      }
+    }, [])
+  )
+
+  // Nollställ valt dryck + sök när kategori ändras (om vi inte sätter programmatiskt)
   useEffect(() => {
+    if (suppressResetRef.current) return
     setSelectedDrink(null)
     setListQuery('')
   }, [selectedType])
 
+  // Imperativt auto-val som kan köras på fokus eller när params uppdateras
+  const applyDeepLink = useCallback(
+    (params: { drinkId?: string; typeId?: string }): boolean => {
+      if (!drinkTypes.length || !allDrinks.length) return false
+
+      // 1) Försök härleda typ från drinkId
+      let d: ListDrink | null = null
+      let t: DrinkType | null = null
+
+      if (params.drinkId) {
+        d = allDrinks.find(x => x.id === params.drinkId) ?? null
+        if (d) t = drinkTypes.find(tt => tt.id === d?.type) ?? null
+      }
+
+      // 2) Eller använd bara typeId om ingen drink matchades
+      if (!t && params.typeId) {
+        t = drinkTypes.find(tt => tt.id === params.typeId) ?? null
+      }
+
+      if (!t) return false
+
+      // Suppressa reset-effekten medan vi sätter båda värdena
+      suppressResetRef.current = true
+      setSelectedType(prev => (prev?.id === t!.id ? prev : t))
+      if (d && d.type === t.id) {
+        setSelectedDrink(d)
+      } else {
+        setSelectedDrink(null)
+      }
+
+      // Släpp suppress efter nästa macrotick så reset kan fungera normalt
+      setTimeout(() => {
+        suppressResetRef.current = false
+      }, 0)
+
+      return true
+    },
+    [allDrinks, drinkTypes]
+  )
+
+  // Listor → filtrering
   const filteredDrinks = useMemo(
     () => (selectedType ? allDrinks.filter(d => d.type === selectedType.id) : []),
     [allDrinks, selectedType]
@@ -63,8 +115,8 @@ export function useAddDrinkScreen() {
     return filteredDrinks.filter(d => [d.name, d.brand].some(v => v?.toLowerCase().includes(q)))
   }, [filteredDrinks, listQuery])
 
-  const handleAdd = async (): Promise<boolean> => {
-    // 👈 returnera success
+  // Lägg till i användarens inventarie
+  const handleAdd = useCallback(async (): Promise<boolean> => {
     const user = auth.currentUser
     if (!user || !selectedDrink || !quantity) return false
 
@@ -74,7 +126,7 @@ export function useAddDrinkScreen() {
       return false
     }
 
-    setSaving(true) // 👈 börja visa loader
+    setSaving(true)
     try {
       await addOrUpdateUserDrink({
         userId: user.uid,
@@ -88,13 +140,14 @@ export function useAddDrinkScreen() {
       Alert.alert(t.general.error, t.add_drink.add_error)
       return false
     } finally {
-      setSaving(false) // 👈 sluta visa loader
+      setSaving(false)
     }
-  }
+  }, [selectedDrink, selectedType?.id, quantity, t])
 
   return {
+    // state
     loading,
-    saving, // 👈 exportera
+    saving,
     drinkTypes,
     selectedType,
     setSelectedType,
@@ -105,6 +158,9 @@ export function useAddDrinkScreen() {
     listQuery,
     setListQuery,
     visibleDrinks,
+
+    // actions
     handleAdd,
+    applyDeepLink, // 👈 NY: anropa denna från Add-skärmen på fokus
   }
 }

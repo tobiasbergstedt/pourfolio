@@ -58,17 +58,13 @@ export default function HomeScreen() {
             }
             style={{ flex: 1, minWidth: 0 }}
           />
-          {isAdmin && (
-            <MasterButton
-              title={t.home.scan_drink}
-              onPress={() => router.push('/')}
-              variant="secondary"
-              icon={
-                <FontAwesome5 name="camera" size={Styles.iconSizeMain} color={Colors.primary} />
-              }
-              style={{ flex: 1, minWidth: 0 }}
-            />
-          )}
+          <MasterButton
+            title={t.home.scan_drink}
+            onPress={() => router.push('/scan')}
+            variant="secondary"
+            icon={<FontAwesome5 name="camera" size={Styles.iconSizeMain} color={Colors.primary} />}
+            style={{ flex: 1, minWidth: 0 }}
+          />
         </View>
 
         <StatsOverview drinks={drinks} />
@@ -98,10 +94,6 @@ export default function HomeScreen() {
               ))
             )}
           </View>
-        )}
-
-        {isAdmin && (
-          <MasterButton title={t.home.add_drink_to_db} onPress={() => router.push('/admin-add')} />
         )}
       </ScrollView>
     </ScreenContainer>

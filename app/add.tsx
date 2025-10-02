@@ -1,4 +1,4 @@
-// screens/add/AddDrinkScreen.tsx
+// app/add.tsx
 import Colors from '@/assets/colors'
 import Styles from '@/assets/styles'
 import CategoryGrid from '@/components/CategoryGrid'
@@ -11,8 +11,9 @@ import AmountCard from '@/components/edit/AmountCard'
 import sharedStyles from '@/components/shared/styles'
 import { useAddDrinkScreen } from '@/hooks/useAddDrinkScreen'
 import { useStrings } from '@/providers/I18nProvider'
-import { useRouter } from 'expo-router'
-import React from 'react'
+import { useFocusEffect, useIsFocused } from '@react-navigation/native'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import React, { useCallback } from 'react'
 import { ActivityIndicator, Platform, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -20,6 +21,16 @@ export default function AddDrinkScreen() {
   const router = useRouter()
   const { t } = useStrings()
   const insets = useSafeAreaInsets()
+  const isFocused = useIsFocused()
+
+  const { drinkId, typeId } = useLocalSearchParams<{
+    drinkId?: string | string[]
+    typeId?: string | string[]
+    fromScan?: string
+  }>()
+
+  const toStr = (v?: string | string[]) => (Array.isArray(v) ? v[0] : v)
+
   const {
     loading,
     saving,
@@ -34,7 +45,36 @@ export default function AddDrinkScreen() {
     setListQuery,
     visibleDrinks,
     handleAdd,
+    applyDeepLink, // 👈
   } = useAddDrinkScreen()
+
+  // 🔁 När skärmen fokuseras: applicera deep link (även om params är samma som förra gången)
+  useFocusEffect(
+    useCallback(() => {
+      const did = toStr(drinkId)
+      const tid = toStr(typeId)
+
+      // Vänta tills data är laddad (loading=false) – görs via en liten poll
+      let cancelled = false
+      const tryApply = () => {
+        if (cancelled) return
+        if (!loading) {
+          applyDeepLink({
+            drinkId: typeof did === 'string' ? did : undefined,
+            typeId: typeof tid === 'string' ? tid : undefined,
+          })
+        } else {
+          // prova igen nästa frame tills listorna är laddade
+          requestAnimationFrame(tryApply)
+        }
+      }
+      tryApply()
+
+      return () => {
+        cancelled = true
+      }
+    }, [drinkId, typeId, loading, applyDeepLink])
+  )
 
   if (loading) {
     return (
