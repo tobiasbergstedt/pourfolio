@@ -1,6 +1,7 @@
 import Colors from '@/assets/colors'
 import Styles from '@/assets/styles'
 import { MasterButtonProps } from '@/types/types'
+import { FontAwesome5 } from '@expo/vector-icons'
 import React from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 
@@ -26,6 +27,7 @@ export default function MasterButton({
     variant === 'secondary' && styles.secondary,
     variant === 'danger' && styles.danger,
     variant === 'text' && styles.textOnly,
+    variant === 'dropdown' && styles.dropdown,
     disabled && styles.disabled,
   ].filter(Boolean)
 
@@ -59,6 +61,14 @@ export default function MasterButton({
         {icon && <View style={styles.iconWrapper}>{icon}</View>}
         <Text style={textStyles}>{title}</Text>
       </View>
+      {variant === 'dropdown' && (
+        <FontAwesome5
+          name="chevron-down"
+          size={Styles.iconSizeMain}
+          color={Colors.white}
+          style={styles.dropdownArrow}
+        />
+      )}
     </Pressable>
   )
 }
@@ -89,6 +99,19 @@ const styles = StyleSheet.create({
   },
   danger: {
     backgroundColor: Colors.danger,
+  },
+  dropdown: {
+    alignItems: 'flex-start',
+    paddingLeft: Styles.marginPaddingLarger,
+    backgroundColor: Colors.primary,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+  },
+  dropdownArrow: {
+    position: 'absolute',
+    right: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   textOnly: {
     backgroundColor: 'transparent',

@@ -5,6 +5,8 @@ import BackButton from '@/components/BackButton'
 import AppDrawerContent from '@/components/navigation/AppDrawerContent'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
 import { I18nProvider, useStrings } from '@/providers/I18nProvider'
+import { ListProvider } from '@/providers/ListProvider'
+import { ToastProvider } from '@/providers/ToastProvider'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Slot, useSegments } from 'expo-router'
 import { Drawer } from 'expo-router/drawer'
@@ -93,18 +95,29 @@ function AppDrawer() {
             title: t.navigation.shopping_list,
             headerLeft: ({ tintColor }) => <BackButton color={tintColor ?? 'black'} />,
             drawerIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="format-list-bulleted" color={color} size={size} />
+              <MaterialCommunityIcons name="format-list-checks" color={color} size={size} />
             ),
           }}
         />
         <Drawer.Screen
           name="scan"
           options={{
-            drawerLabel: t.navigation.scan_drink ?? 'Scan drink',
-            title: t.navigation.scan_drink ?? 'Scan drink',
+            drawerLabel: t.navigation.scan_drink,
+            title: t.navigation.scan_drink,
             headerLeft: ({ tintColor }) => <BackButton color={tintColor ?? 'black'} />,
             drawerIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="barcode-scan" color={color} size={size} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="lists"
+          options={{
+            drawerLabel: t.navigation.lists,
+            title: t.navigation.lists,
+            headerLeft: ({ tintColor }) => <BackButton color={tintColor ?? 'black'} />,
+            drawerIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="format-list-bulleted" color={color} size={size} />
             ),
           }}
         />
@@ -187,7 +200,11 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <I18nProvider>
-          <AppDrawer />
+          <ToastProvider>
+            <ListProvider>
+              <AppDrawer />
+            </ListProvider>
+          </ToastProvider>
         </I18nProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

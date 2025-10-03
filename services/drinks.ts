@@ -8,8 +8,12 @@ import {
   collection,
   doc,
   DocumentReference,
+  getDoc,
   getDocs,
+  increment,
   query,
+  serverTimestamp,
+  setDoc,
   updateDoc,
   where,
 } from 'firebase/firestore'
@@ -52,6 +56,30 @@ export async function addOrUpdateUserDrink(opts: {
       drink_type: selectedTypeId
         ? (doc(db, 'drinkTypes', selectedTypeId) as DocumentReference)
         : null,
+    })
+  }
+}
+
+export async function addOrUpdateListDrink(params: {
+  listId: string
+  drinkId: string
+  qty: number
+  selectedTypeId?: string | null
+}) {
+  const ref = doc(db, 'lists', params.listId, 'drinks', params.drinkId)
+  const snap = await getDoc(ref)
+  if (snap.exists()) {
+    await updateDoc(ref, {
+      quantity: increment(params.qty),
+      updatedAt: serverTimestamp(),
+    })
+  } else {
+    await setDoc(ref, {
+      quantity: params.qty,
+      type: params.selectedTypeId ?? null, // category-id (snabb join)
+      drink_ref: doc(db, 'drinks', params.drinkId), // referens (fallback join)
+      addedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     })
   }
 }

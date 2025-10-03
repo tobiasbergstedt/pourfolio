@@ -30,6 +30,7 @@ const Colors = {
   blackOpaque35: '#00000059',
   gray: '#888888',
   superLightGray: '#EEEEEE',
+  superDuperLightGray: '#FAFAFA',
   lightGray: '#CCCCCC',
   mediumGray: '#666666',
   darkGray: '#333333',

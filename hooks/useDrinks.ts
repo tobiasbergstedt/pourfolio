@@ -1,64 +1,132 @@
-// home/useDrinks.ts
-import { auth, db } from '@/lib/firebase'
+// hooks/useDrinks.ts
+import { db } from '@/lib/firebase'
 import { useStrings } from '@/providers/I18nProvider'
-import { DrinkDocument, DrinkRefData, DrinkTypeDocument } from '@/types/firebase'
-import { Drink } from '@/types/types'
-import { onAuthStateChanged } from 'firebase/auth'
-import { collection, getDoc, onSnapshot, query } from 'firebase/firestore'
+import type { Drink } from '@/types/types'
+import { collection, doc, getDoc, onSnapshot } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 
-export function useDrinks() {
+/**
+ * Hämtar dryckerna för en vald lista (lists/{listId}/drinks/*) och
+ * joinar mot global katalog (drinks/{drinkId}) + drinkTypes.
+ * Returnerar samma struktur som tidigare användes på startsidan.
+ *
+ * 🔁 Soft delete: filtrerar bort rader där quantity <= 0
+ */
+export function useDrinks(listId?: string | null) {
   const { t } = useStrings()
   const [drinks, setDrinks] = useState<Drink[]>([])
 
   useEffect(() => {
-    let unsubscribeSnapshot: (() => void) | undefined
+    let cancelled = false
+    let unsubscribe: (() => void) | undefined
 
-    const unsubscribeAuth = onAuthStateChanged(auth, user => {
-      if (!user) return
+    // Ingen vald lista → töm
+    if (!listId) {
+      setDrinks([])
+      return
+    }
 
-      const q = query(collection(db, `users/${user.uid}/drinks`))
+    const col = collection(db, 'lists', listId, 'drinks')
 
-      unsubscribeSnapshot = onSnapshot(q, async snapshot => {
-        const list = await Promise.all(
-          snapshot.docs.map(async docSnap => {
-            const data = docSnap.data() as DrinkRefData
-            if (!data?.drink_type || !data?.drink_ref) return null
+    unsubscribe = onSnapshot(
+      col,
+      async snap => {
+        try {
+          const rows = await Promise.all(
+            snap.docs.map(async d => {
+              try {
+                const listData = d.data() as any
+                const drinkId = d.id
 
-            const typeSnap = await getDoc(data.drink_type)
-            const drinkDoc = await getDoc(data.drink_ref)
+                // Soft delete-filter: hoppa över poster med quantity <= 0
+                const qty = Number(listData?.quantity ?? 0)
+                if (!Number.isFinite(qty) || qty <= 0) return null
 
-            const drinkData = drinkDoc.data() as DrinkDocument | undefined
-            const typeData = typeSnap.data() as DrinkTypeDocument | undefined
+                // Global dryck
+                const drinkSnap = await getDoc(doc(db, 'drinks', drinkId))
+                if (!drinkSnap.exists()) return null
+                const g = drinkSnap.data() as any
 
-            const drinkTypeKey =
-              (typeData?.name.toLowerCase() as keyof typeof t.general.drink_types) || 'fallback'
-            const drink_name = t.general.drink_types[drinkTypeKey]
+                // Typ-id: helst från listpostens "type", annars från global doc referensen
+                const typeId: string | undefined =
+                  (typeof listData?.type === 'string' && listData.type) || g?.drink_type?.id
 
-            return {
-              id: docSnap.id,
-              name: drinkData?.name ?? t.general.name_missing,
-              quantity: data.quantity || 0,
-              type: typeData?.name ?? t.home.unknown_drink_type,
-              type_name: drink_name,
-              alcohol_percent: drinkData?.alcohol_percent ?? null,
-              image_label: drinkData?.image_label ?? null,
-              rating: data.rating ?? null,
-            }
-          })
-        )
+                // Typnamn
+                let typeName: string | undefined
+                if (typeId) {
+                  try {
+                    const typeSnap = await getDoc(doc(db, 'drinkTypes', typeId))
+                    if (typeSnap.exists()) {
+                      typeName = (typeSnap.data() as any)?.name
+                    }
+                  } catch {
+                    /* noop – behåll undefined */
+                  }
+                }
 
-        const valid = list.filter(Boolean) as Drink[]
-        valid.sort((a, b) => a.name.localeCompare(b.name))
-        setDrinks(valid)
-      })
-    })
+                // Lokaliserad typlabel
+                const key = (typeName ?? '')
+                  .toString()
+                  .toLowerCase() as keyof typeof t.general.drink_types
+                const localizedType =
+                  t.general.drink_types[key] ?? typeName ?? t.home.unknown_drink_type
+
+                const name = (g?.name as string) ?? t.general.name_missing
+
+                const row: Drink = {
+                  id: drinkId,
+                  name,
+                  quantity: qty,
+                  type: (typeName ?? '').toString(), // används för filtrering på startsidan
+                  type_name: localizedType, // visningsnamn
+                  alcohol_percent: g?.alcohol_percent ?? null,
+                  image_label: g?.image_label ?? null,
+                  rating: g?.rating ?? null,
+                  brand: g?.brand ?? null,
+                  country: g?.country ?? null,
+                  volume: g?.volume ?? null,
+                  description: g?.description ?? null,
+                  pairing_suggestions: g?.pairing_suggestions ?? null,
+                }
+
+                return row
+              } catch {
+                return null
+              }
+            })
+          )
+
+          if (cancelled) return
+
+          const valid = rows.filter(Boolean) as Drink[]
+          valid.sort((a, b) => a.name.localeCompare(b.name))
+          setDrinks(valid)
+        } catch (e) {
+          if (cancelled) return
+          console.warn('[useDrinks] build rows failed:', e)
+          setDrinks([])
+        }
+      },
+      err => {
+        // Viktigt: när en lista raderas och din membership försvinner
+        // kan snapshotten få "permission denied". Fånga det och
+        // töm listan istället för att krascha UI.
+        if (cancelled) return
+        console.warn('[useDrinks] snapshot error for', listId, err)
+        setDrinks([])
+      }
+    )
 
     return () => {
-      if (unsubscribeSnapshot) unsubscribeSnapshot()
-      unsubscribeAuth()
+      cancelled = true
+      try {
+        unsubscribe?.()
+      } catch {
+        /* noop */
+      }
     }
-  }, [])
+    // Beroenden: använd konkreta strängar för att undvika onödig re-subscribe
+  }, [listId, t.general.drink_types, t.home.unknown_drink_type, t.general.name_missing])
 
   return drinks
 }

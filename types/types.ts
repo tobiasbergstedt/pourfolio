@@ -58,7 +58,7 @@ type MasterButtonProps = {
   onPress: () => void
   title: string
   disabled?: boolean
-  variant?: 'primary' | 'secondary' | 'danger' | 'text'
+  variant?: 'primary' | 'secondary' | 'danger' | 'text' | 'dropdown'
   size?: 'full' | 'auto' | 'small'
   icon?: React.ReactNode
   inline?: boolean

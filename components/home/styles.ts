@@ -14,6 +14,7 @@ const styles = StyleSheet.create({
     borderWidth: Styles.borderWidthCard,
     overflow: 'hidden',
   },
+  homeButton: { flex: 1, minWidth: 0 },
   name: { fontWeight: 'bold', fontSize: Styles.fontSizeButton },
   row: {
     flexDirection: 'row',

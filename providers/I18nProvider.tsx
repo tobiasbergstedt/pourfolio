@@ -2,7 +2,7 @@
 import en from '@/locales/en'
 import sv from '@/locales/sv'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 type Locale = 'sv' | 'en'
 type Dict = typeof sv
@@ -11,6 +11,7 @@ type I18nCtx = {
   locale: Locale
   setLocale: (l: Locale) => void
   t: Dict
+  fmt: (template: string, vars?: Record<string, unknown>) => string
 }
 
 const I18nContext = createContext<I18nCtx | null>(null)
@@ -33,8 +34,20 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
   const t = useMemo(() => (locale === 'sv' ? sv : en), [locale])
 
+  // En enkel interpolator: "Hej {name}" + { name: 'Alex' } => "Hej Alex"
+  const fmt = useCallback((template: string, vars?: Record<string, unknown>) => {
+    if (!template || !vars) return template
+    return template.replace(
+      /\{(\w+)\}/g,
+      (m, key) =>
+        Object.prototype.hasOwnProperty.call(vars, key) && vars[key] != null ? String(vars[key]) : m // lämna okända placeholders orörda
+    )
+  }, [])
+
   return (
-    <I18nContext.Provider value={{ locale, setLocale: change, t }}>{children}</I18nContext.Provider>
+    <I18nContext.Provider value={{ locale, setLocale: change, t, fmt }}>
+      {children}
+    </I18nContext.Provider>
   )
 }
 

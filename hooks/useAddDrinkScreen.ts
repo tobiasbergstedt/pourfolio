@@ -1,7 +1,8 @@
 // hooks/useAddDrinkScreen.ts
 import { auth } from '@/lib/firebase'
 import { useStrings } from '@/providers/I18nProvider'
-import { addOrUpdateUserDrink, fetchDrinkTypes, fetchDrinks } from '@/services/drinks'
+import { useCurrentList } from '@/providers/ListProvider'
+import { addOrUpdateListDrink, fetchDrinkTypes, fetchDrinks } from '@/services/drinks'
 import type { ListDrink } from '@/types/list'
 import type { DrinkType } from '@/types/types'
 import { useFocusEffect } from '@react-navigation/native'
@@ -19,6 +20,7 @@ export function useAddDrinkScreen(_init?: Init) {
   const [selectedDrink, setSelectedDrink] = useState<ListDrink | null>(null)
   const [quantity, setQuantity] = useState('1')
   const [listQuery, setListQuery] = useState('')
+  const { selectedListId } = useCurrentList()
 
   // När vi sätter typ/dryck programmatiskt vill vi inte att reset-effekten kör
   const suppressResetRef = useRef(false)
@@ -118,18 +120,16 @@ export function useAddDrinkScreen(_init?: Init) {
   // Lägg till i användarens inventarie
   const handleAdd = useCallback(async (): Promise<boolean> => {
     const user = auth.currentUser
-    if (!user || !selectedDrink || !quantity) return false
-
+    if (!user || !selectedDrink || !quantity || !selectedListId) return false
     const qty = parseInt(quantity, 10)
     if (isNaN(qty) || qty <= 0) {
       Alert.alert(t.general.error, t.edit_drink.positive_integer)
       return false
     }
-
     setSaving(true)
     try {
-      await addOrUpdateUserDrink({
-        userId: user.uid,
+      await addOrUpdateListDrink({
+        listId: selectedListId,
         drinkId: selectedDrink.id,
         qty,
         selectedTypeId: selectedType?.id,
@@ -142,7 +142,7 @@ export function useAddDrinkScreen(_init?: Init) {
     } finally {
       setSaving(false)
     }
-  }, [selectedDrink, selectedType?.id, quantity, t])
+  }, [selectedDrink, quantity, selectedType?.id, t, selectedListId])
 
   return {
     // state

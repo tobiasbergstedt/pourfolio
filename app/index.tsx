@@ -1,6 +1,7 @@
+// app/index.tsx
 import { FontAwesome5 } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Platform, ScrollView, Text, View } from 'react-native'
 
 import IconTextInput from '@/components/IconTextInput'
@@ -8,9 +9,10 @@ import ScreenContainer from '@/components/ScreenContainer'
 import DrinkItem from '@/components/home/DrinkItem'
 import EmptyMessage from '@/components/home/EmptyMessage'
 import StatsOverview from '@/components/home/Stats'
+import ListSwitcher from '@/components/lists/ListSwitcher'
 import { useDrinks } from '@/hooks/useDrinks'
-import { useIsAdmin } from '@/hooks/useIsAdmin'
 import { useUserProfile } from '@/hooks/useUserProfile'
+import { useCurrentList } from '@/providers/ListProvider'
 
 import Colors from '@/assets/colors'
 import Styles from '@/assets/styles'
@@ -20,20 +22,26 @@ import styles from '@/components/home/styles'
 import { useStrings } from '@/providers/I18nProvider'
 
 export default function HomeScreen() {
+  const { selectedListId, ensurePersonalList } = useCurrentList()
   const router = useRouter()
-  const { isAdmin } = useIsAdmin()
   const { t } = useStrings()
-  const drinks = useDrinks()
+  // useDrinks filtrerar nu bort quantity <= 0
+  const drinks = useDrinks(selectedListId)
   const firstName = useUserProfile()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const filteredDrinks = drinks.filter(drink => {
-    const matchesQuery = drink.name.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory =
-      selectedCategories.length === 0 || selectedCategories.includes(drink.type.toLowerCase())
+    const name = (drink?.name ?? '').toString()
+    const matchesQuery = name.toLowerCase().includes(searchQuery.toLowerCase())
+    const typeKey = (drink?.type ?? '').toString().toLowerCase()
+    const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(typeKey)
     return matchesQuery && matchesCategory
   })
+
+  useEffect(() => {
+    ensurePersonalList().catch(() => {})
+  }, [])
 
   return (
     <ScreenContainer>
@@ -56,44 +64,58 @@ export default function HomeScreen() {
             icon={
               <FontAwesome5 name="plus-circle" size={Styles.iconSizeMain} color={Colors.white} />
             }
-            style={{ flex: 1, minWidth: 0 }}
+            style={styles.homeButton}
           />
           <MasterButton
             title={t.home.scan_drink}
             onPress={() => router.push('/scan')}
             variant="secondary"
             icon={<FontAwesome5 name="camera" size={Styles.iconSizeMain} color={Colors.primary} />}
-            style={{ flex: 1, minWidth: 0 }}
+            style={styles.homeButton}
           />
         </View>
 
-        <StatsOverview drinks={drinks} />
+        <ListSwitcher />
 
-        <DrinkCategories onSelect={setSelectedCategories} />
-
-        {drinks.length === 0 && searchQuery.trim() === '' ? (
-          <EmptyMessage text={t.home.no_drinks_added} />
+        {!selectedListId ? (
+          <EmptyMessage text={t.home.no_list_selected} />
         ) : (
-          <View style={styles.listWrapper}>
-            <IconTextInput
-              icon="search"
-              placeholder={t.home.search_placeholder}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
+          <>
+            <StatsOverview drinks={drinks} />
 
-            {filteredDrinks.length === 0 ? (
-              <EmptyMessage text={t.general.no_results_found} />
+            <DrinkCategories onSelect={setSelectedCategories} />
+
+            {drinks.length === 0 && searchQuery.trim() === '' ? (
+              <EmptyMessage text={t.home.no_drinks_added} />
             ) : (
-              filteredDrinks.map(drink => (
-                <DrinkItem
-                  key={drink.id}
-                  item={drink}
-                  onPress={() => router.push({ pathname: '/edit', params: { id: drink.id } })}
+              <View style={styles.listWrapper}>
+                <IconTextInput
+                  icon="search"
+                  placeholder={t.home.search_placeholder}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
                 />
-              ))
+
+                {filteredDrinks.length === 0 ? (
+                  <EmptyMessage text={t.general.no_results_found} />
+                ) : (
+                  filteredDrinks.map(drink => (
+                    <DrinkItem
+                      key={drink.id}
+                      item={drink}
+                      onPress={() => {
+                        if (!selectedListId) return
+                        router.push({
+                          pathname: '/edit',
+                          params: { id: drink.id, listId: selectedListId },
+                        })
+                      }}
+                    />
+                  ))
+                )}
+              </View>
             )}
-          </View>
+          </>
         )}
       </ScrollView>
     </ScreenContainer>
